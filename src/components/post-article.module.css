@@ -1,0 +1,67 @@
+.page {
+  width: min(100% - 3rem, 70ch);
+  margin-inline: auto;
+  padding-block: 3rem 5rem;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block-end: 1.5rem;
+}
+
+.heading {
+  padding-block-end: 2rem;
+  border-block-end: 1px solid var(--border);
+}
+
+.title {
+  margin: 0 0 1.5rem;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.dates { margin: 0; color: var(--muted); font-size: 0.9375rem; }
+.body { margin-block: 2.5rem 3rem; }
+
+.controls {
+  padding-block: 1rem;
+  border-block-start: 1px solid var(--border);
+}
+
+.controlActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.controlActions a, .controlActions button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 0;
+  border: 0;
+  background: none;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.9375rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.controlActions :is(a, button):hover { text-decoration-thickness: 2px; }
+.controlActions button:disabled, .controlActions a[aria-disabled="true"] { color: var(--muted); cursor: wait; }
+.confirmation { margin-block-start: 1rem; }
+.confirmation p { margin: 0 0 0.75rem; overflow-wrap: anywhere; }
+.error { margin-block: 1rem 0; font-weight: 600; }
+
+@media (max-width: 40rem) {
+  .page { width: calc(100% - 2.5rem); padding-block-start: 2rem; }
+}

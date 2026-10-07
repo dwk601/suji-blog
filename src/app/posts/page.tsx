@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
+import { getPublicPosts } from "@/lib/public-posts";
 import styles from "./posts.module.css";
 
 export const metadata: Metadata = {
@@ -17,17 +19,32 @@ export default function PostsPage() {
         </p>
       </header>
 
+      <Suspense fallback={<p className={styles.description} role="status">Loading posts…</p>}><PostsList /></Suspense>
+    </main>
+  );
+}
+
+async function PostsList() {
+  const posts = await getPublicPosts();
+  if (posts.length) return (
+    <ul className={styles.list}>
+      {posts.map((post) => <li key={post.id} className={styles.row}>
+        <h2 className={styles.postTitle}><Link href={`/posts/${post.id}`}>{post.title}</Link></h2>
+        <time className={styles.date} dateTime={post.createdAt.toISOString()}>{new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" }).format(post.createdAt)}</time>
+      </li>)}
+    </ul>
+  );
+  return (
       <section className={styles.empty} aria-labelledby="empty-title">
         <h2 id="empty-title" className={styles.emptyTitle}>
           No posts yet.
         </h2>
         <p className={styles.description}>
-          Published posts will appear here.
+          New writing will appear here. Come back soon.
         </p>
         <Link href="/" className={styles.link}>
           Back to home
         </Link>
       </section>
-    </main>
   );
 }
