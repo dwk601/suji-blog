@@ -23,10 +23,130 @@
 .description {
   max-width: 65ch;
   margin: 0;
-  padding-block: clamp(2rem, 5vw, 4rem);
   color: var(--muted);
   font-size: 1rem;
   line-height: 1.7;
+}
+
+.owner {
+  max-width: 42rem;
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.sectionTitle {
+  margin: 0 0 1.5rem;
+  font-family: var(--font-editorial, Georgia, "Times New Roman", serif);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.identity {
+  margin-bottom: 1.5rem;
+}
+
+.ownerName {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.ownerEmail {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.form {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.fields {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.formTitle {
+  margin-bottom: 1.5rem;
+  padding: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.fields label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.fields select {
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--foreground);
+  background: var(--background);
+  font: inherit;
+}
+
+.fields select:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.submit {
+  justify-self: start;
+  min-height: 3rem;
+  margin-top: 1rem;
+  padding: 0.625rem 1.5rem;
+  border: 1px solid var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.submit:active:not(:disabled) {
+  background: var(--border);
+}
+
+.submit:disabled,
+.fields:disabled select {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fields:disabled .submit,
+.fields:disabled select {
+  cursor: wait;
+}
+
+.message {
+  margin: 1.5rem 0 0;
+  font-size: 0.9375rem;
+}
+
+.message[role="alert"] {
+  font-weight: 500;
 }
 
 .loading {
