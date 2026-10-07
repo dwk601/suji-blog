@@ -1,3 +1,5 @@
+import "server-only";
+
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -11,11 +13,17 @@ export const r2 = new S3Client({
 });
 
 /** Presigned PUT URL for direct browser uploads to R2. */
-export function getUploadUrl(key: string, contentType: string) {
+export function getUploadUrl(key: string, contentType: string, size: number) {
   return getSignedUrl(
     r2,
-    new PutObjectCommand({ Bucket: process.env.R2_BUCKET, Key: key, ContentType: contentType }),
-    { expiresIn: 60 },
+    new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET,
+      Key: key,
+      ContentType: contentType,
+      ContentLength: size,
+      IfNoneMatch: "*",
+    }),
+    { expiresIn: 60, signableHeaders: new Set(["content-type", "if-none-match"]) },
   );
 }
 

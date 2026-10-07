@@ -1,0 +1,25 @@
+.picker { min-width: 0; }
+.heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
+.heading h3 { margin: 0; font-size: 1.25rem; }
+.picker button { min-height: 44px; padding: 0.5rem 0.75rem; border: 1px solid var(--border); background: var(--background); color: var(--foreground); font: inherit; font-size: 0.875rem; cursor: pointer; }
+.picker button:hover:not(:disabled) { border-color: var(--foreground); }
+.picker button:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.65; }
+.hint, .metadata, .status { color: var(--muted); font-size: 0.875rem; }
+.hint { margin-block: 0.5rem 1.5rem; }
+.upload { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.upload label { flex-basis: 100%; font-weight: 600; }
+.upload input { min-width: 0; max-width: 100%; flex: 1 1 15rem; color: var(--foreground); font: inherit; font-size: 1rem; }
+.upload input::file-selector-button { min-height: 44px; margin-inline-end: 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--border); background: var(--background); color: var(--foreground); font: inherit; cursor: pointer; }
+.error { font-weight: 600; overflow-wrap: anywhere; }
+.status { margin-block: 1rem; min-height: 1.5rem; }
+.empty { margin-block: 1.5rem; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); gap: 1.5rem; padding: 0; margin-block: 1.5rem 0; list-style: none; }
+.photo { min-width: 0; }
+.preview { position: relative; aspect-ratio: 4 / 3; background: var(--background); border: 1px solid var(--border); }
+.preview img { width: 100%; height: 100%; object-fit: contain; }
+.preview p { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; background: var(--background); color: var(--muted); font-size: 0.875rem; }
+.metadata { margin-block: 0.5rem; font-variant-numeric: tabular-nums; }
+.photo > button { margin-inline-end: 0.5rem; margin-block-end: 0.5rem; }
+.confirm { padding-block: 0.75rem; border-block-start: 1px solid var(--border); }
+.confirm p { margin-block: 0 0.75rem; font-size: 0.875rem; }
+.confirm button { margin-inline-end: 0.5rem; margin-block-end: 0.5rem; }
