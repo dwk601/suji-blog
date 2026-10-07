@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
+import styles from "@/components/site-header.module.css";
 import { editorial, geistMono, geistSans } from "@/lib/fonts";
 import "./globals.css";
 
@@ -14,7 +15,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${editorial.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className={`${styles.shell} min-h-full flex flex-col`}>
         <SiteHeader />
         {children}
       </body>
