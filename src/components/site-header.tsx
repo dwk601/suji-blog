@@ -15,8 +15,15 @@ export function SiteHeader() {
       </div>
       <nav aria-label="Main navigation" className={styles.navigation}>
         <ul className={styles.links}>
-          <SiteNavLink href="/">Home</SiteNavLink>
-          <SiteNavLink href="/posts">Posts</SiteNavLink>
+          <Suspense fallback={
+            <>
+              <li><Link href="/" className={styles.navLink}>Home</Link></li>
+              <li><Link href="/posts" className={styles.navLink}>Posts</Link></li>
+            </>
+          }>
+            <SiteNavLink href="/">Home</SiteNavLink>
+            <SiteNavLink href="/posts">Posts</SiteNavLink>
+          </Suspense>
           <Suspense fallback={null}>
             <SettingsLink />
           </Suspense>
