@@ -24,7 +24,9 @@ export async function getEditorPost(id: string): Promise<PostEditorData | null> 
   if (!validId(id)) return null;
   const post = await getPublicPost(id);
   if (!post) return null;
-  const content = validatePostContent(post.content);
+  // Schema output includes null-prototype attrs; the composer needs a plain
+  // JSON DTO that can cross the Server Component boundary.
+  const content: JSONContent = JSON.parse(JSON.stringify(validatePostContent(post.content)));
   return {
     id: post.id,
     title: post.title,

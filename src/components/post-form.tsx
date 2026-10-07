@@ -29,7 +29,9 @@ export function PostForm({ initialPost, renderEditor }: PostFormProps) {
     setError("");
     startTransition(async () => {
       try {
-        const result = await savePost({ ...(initialPost ? { id: initialPost.id } : {}), title, content });
+        // ProseMirror attributes have a null prototype. Cross the Server Action
+        // boundary with plain JSON objects, not React temporary references.
+        const result = await savePost({ ...(initialPost ? { id: initialPost.id } : {}), title, content: JSON.parse(JSON.stringify(content)) });
         if (!result.ok) {
           setError(result.error);
           return;
