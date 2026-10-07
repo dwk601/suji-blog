@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  --font-mono: var(--font-geist-mono, "Courier New", monospace);
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: light;
+    --background: #ffffff;
+    --foreground: #171717;
+    --muted: #666666;
+    --border: #dedede;
+    --font-editorial: "Bodoni MT", Didot, "Times New Roman", serif;
+  }
+
+  html {
+    background: var(--background);
+    color: var(--foreground);
+    scrollbar-color: var(--muted) var(--background);
+    scroll-padding-block-start: 2rem;
+  }
+
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+    font-size: 1rem;
+    line-height: 1.6;
+    caret-color: var(--foreground);
+  }
+
+  :where(h1, h2, h3, h4, h5, h6) {
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  :where(p, li) {
+    overflow-wrap: break-word;
+  }
+
+  :where(a) {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  :where(a:hover) {
+    text-decoration-thickness: 2px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 4px;
+  }
+
+  ::selection {
+    background: var(--foreground);
+    color: var(--background);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }
