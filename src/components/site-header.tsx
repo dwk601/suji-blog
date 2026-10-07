@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { SettingsLink } from "./settings-link";
+import { AccountNav } from "./auth/account-nav";
 import { SiteNavLink } from "./site-nav";
 import styles from "./site-header.module.css";
 
@@ -18,6 +19,9 @@ export function SiteHeader() {
           <SiteNavLink href="/posts">Posts</SiteNavLink>
           <Suspense fallback={null}>
             <SettingsLink />
+          </Suspense>
+          <Suspense fallback={null}>
+            <AccountNav />
           </Suspense>
         </ul>
       </nav>

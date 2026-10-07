@@ -1,0 +1,129 @@
+.page {
+  width: min(100% - 3rem, 28rem);
+  margin-inline: auto;
+  padding-block: clamp(3rem, 7vw, 5rem) 4rem;
+}
+
+.title {
+  margin: 0 0 1rem;
+  font-family: var(--font-editorial, Georgia, "Times New Roman", serif);
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.introduction {
+  margin: 0 0 2.5rem;
+  color: var(--muted);
+}
+
+.form {
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.fields {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.field label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--foreground);
+  background: var(--background);
+  font: inherit;
+}
+
+.field input:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.submit {
+  min-height: 3rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--foreground);
+  color: var(--background);
+  background: var(--foreground);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.submit:hover:not(:disabled) {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.submit:active:not(:disabled) {
+  background: var(--border);
+}
+
+.fields:disabled input,
+.fields:disabled .submit {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.message {
+  margin: 1.5rem 0 0;
+  font-size: 0.9375rem;
+}
+
+.message[role="alert"] {
+  font-weight: 500;
+}
+
+.alternate {
+  margin: 1.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.alternate a {
+  display: inline-block;
+  padding-block: 0.5rem;
+  color: var(--foreground);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .page {
+    width: calc(100% - 2.5rem);
+  }
+}

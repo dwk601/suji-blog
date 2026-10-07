@@ -9,12 +9,15 @@ export function SiteNavLink({
   href,
   children,
 }: {
-  href: "/" | "/posts" | "/settings";
+  href: "/" | "/posts" | "/posts/manage" | "/settings" | "/sign-in" | "/sign-up";
   children: ReactNode;
 }) {
   const pathname = usePathname();
   const isCurrent =
-    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+    pathname === href ||
+    (href === "/posts" &&
+      pathname.startsWith("/posts/") &&
+      !pathname.startsWith("/posts/manage"));
 
   return (
     <li>

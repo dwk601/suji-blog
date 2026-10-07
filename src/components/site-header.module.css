@@ -71,6 +71,40 @@
   outline-offset: 4px;
 }
 
+.navButton {
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.navButton:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.accountStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0.625rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.accountItem {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.accountError {
+  max-width: 28ch;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
 @media (max-width: 640px) {
   .header {
     width: calc(100% - 2.5rem);
