@@ -1,0 +1,65 @@
+.section {
+  margin-block-start: 3rem;
+  padding-block-start: 2rem;
+  border-block-start: 1px solid var(--border);
+}
+
+.title {
+  margin: 0 0 1.5rem;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.list { margin: 0; padding: 0; list-style: none; }
+.comment { padding-block: 1.5rem; border-block-end: 1px solid var(--border); }
+.heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1rem; }
+.author { margin: 0; font: inherit; font-weight: 600; overflow-wrap: anywhere; }
+.body { margin-block: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.empty, .signIn { margin-block: 0 1.5rem; color: var(--muted); }
+.signIn a { display: inline-block; min-height: 44px; color: var(--foreground); }
+.hint { margin: 0; color: var(--muted); font-size: 0.875rem; }
+
+.form { display: grid; gap: 0.75rem; margin-block-start: 2rem; }
+.form label { font-weight: 600; }
+.form textarea {
+  width: 100%;
+  min-height: 8rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+.form textarea:disabled { color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+.actions button {
+  min-height: 44px;
+  padding: 0.5rem 0;
+  border: 0;
+  background: none;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.9375rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.actions button:hover:not(:disabled) { text-decoration-thickness: 2px; }
+.actions button:disabled { color: var(--muted); cursor: wait; }
+.actions .submit {
+  min-height: 3rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--foreground);
+  color: var(--background);
+  text-decoration: none;
+}
+.actions .submit:hover:not(:disabled) { background: #333333; }
+.actions .submit:disabled { color: var(--background); opacity: 0.65; }
+.controls { margin-block-start: 0.75rem; }
+.confirmation { margin-block-start: 0.75rem; }
+.confirmation p { margin-block: 0 0.5rem; }
+.error { margin: 0; font-weight: 600; }
