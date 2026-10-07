@@ -1,0 +1,133 @@
+.editor {
+  min-width: 0;
+  border: 1px solid var(--border);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-block-end: 1px solid var(--border);
+}
+
+.editor button {
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid transparent;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.editor button:hover:not(:disabled) {
+  border-color: var(--foreground);
+}
+
+.editor button[aria-pressed="true"] {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.editor button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.editable {
+  padding: 1.5rem;
+}
+
+.editable :global(.tiptap) {
+  min-height: 20rem;
+  outline-offset: 0.5rem;
+}
+
+.editable :global(.tiptap[contenteditable="false"]) {
+  color: var(--muted);
+}
+
+.image {
+  margin-block: 1.5rem;
+}
+
+.image img {
+  margin: 0;
+  cursor: pointer;
+}
+
+.image :global(.ProseMirror-selectednode),
+.image:global(.ProseMirror-selectednode) {
+  outline: 2px solid var(--foreground);
+  outline-offset: 4px;
+}
+
+.image span {
+  display: block;
+  padding: 1rem;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+
+.fields {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-block-start: 1px solid var(--border);
+}
+
+.fields label {
+  font-weight: 600;
+}
+
+.fieldRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fields input {
+  min-width: 0;
+  flex: 1 1 14rem;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.fields input::placeholder {
+  color: var(--muted);
+}
+
+.fields p, .hint, .loading, .error {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.fields p, .hint, .loading {
+  color: var(--muted);
+}
+
+.hint, .loading, .error {
+  padding: 1rem;
+}
+
+.error {
+  font-weight: 600;
+}
+
+.picker {
+  padding: 1rem;
+  border-block-start: 1px solid var(--border);
+}
+
+@media (max-width: 40rem) {
+  .editable { padding: 1rem; }
+  .toolbar { padding: 0.5rem; }
+}
