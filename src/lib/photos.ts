@@ -94,7 +94,7 @@ export async function beginPhotoUpload(contentType: unknown, size: unknown) {
     key,
     uploadUrl: await getUploadUrl(key, checked.contentType, checked.size),
     receipt: `${payload}.${signature(payload).toString("base64url")}`,
-    headers: { "Content-Type": checked.contentType, "If-None-Match": "*" },
+    headers: { "Content-Type": checked.contentType },
   };
 }
 

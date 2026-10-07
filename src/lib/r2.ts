@@ -21,9 +21,8 @@ export function getUploadUrl(key: string, contentType: string, size: number) {
       Key: key,
       ContentType: contentType,
       ContentLength: size,
-      IfNoneMatch: "*",
     }),
-    { expiresIn: 60, signableHeaders: new Set(["content-type", "if-none-match"]) },
+    { expiresIn: 60, signableHeaders: new Set(["content-type"]) },
   );
 }
 
