@@ -1,0 +1,117 @@
+.page {
+  width: min(100% - 3rem, 80rem);
+  margin-inline: auto;
+  padding-block: clamp(3rem, 7vw, 6rem) 4rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  align-items: end;
+  gap: 3rem;
+  padding-bottom: clamp(2.5rem, 5vw, 4.5rem);
+  border-bottom: 1px solid var(--border, #dedede);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-editorial, Georgia, "Times New Roman", serif);
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.statement {
+  margin: 0;
+  font-family: var(--font-editorial, Georgia, "Times New Roman", serif);
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  line-height: 1.2;
+}
+
+.introduction {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 3rem;
+  padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem);
+}
+
+.introduction p {
+  grid-column: 2;
+  max-width: 38ch;
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+.journal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-block: 2rem;
+  border-block: 1px solid var(--border, #dedede);
+}
+
+.sectionTitle {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-editorial, Georgia, "Times New Roman", serif);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.description {
+  margin: 0;
+  color: var(--muted, #646464);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.link {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.75rem;
+  min-height: 2.75rem;
+  padding-block: 0.625rem;
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
+  text-decoration-thickness: 1px;
+}
+
+.link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 5px;
+}
+
+@media (max-width: 640px) {
+  .page {
+    width: calc(100% - 2.5rem);
+  }
+
+  .hero,
+  .introduction {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .introduction p {
+    grid-column: 1;
+  }
+
+  .journal {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}
