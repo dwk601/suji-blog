@@ -86,7 +86,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
 
   return (
     <>
-      <form className={styles.form} onSubmit={submit} aria-busy={pending}>
+      <form method="post" className={styles.form} onSubmit={submit} aria-busy={pending}>
         <fieldset className={styles.fields} disabled={pending}>
           <legend className={styles.srOnly}>Account details</legend>
           {registering && (
