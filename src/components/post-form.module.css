@@ -1,6 +1,21 @@
 .form {
+  --composer-actions-height: 8rem;
+  --composer-keyboard-inset: 0px;
   max-width: 60rem;
   margin-inline: auto;
+}
+
+.form :is(input, textarea, select, [contenteditable="true"], [contenteditable="true"] *) {
+  scroll-margin-block-end: calc(var(--composer-actions-height) + 1rem);
+}
+
+/* The visual viewport, not the layout viewport, determines whether both bars fit. */
+.form[data-short-viewport="true"] [aria-label="Text formatting"] {
+  position: static;
+}
+
+.form[data-tiny-viewport="true"] .actionArea {
+  position: static;
 }
 
 .fields {
@@ -43,6 +58,30 @@
   font-size: 0.9375rem;
 }
 
+.actionArea {
+  position: sticky;
+  bottom: var(--composer-keyboard-inset);
+  z-index: 30;
+  display: grid;
+  gap: 0.5rem;
+  margin-block-start: 1.5rem;
+  padding-block: 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+  padding-inline: 0.5rem;
+  border-block-start: 1px solid var(--border);
+  background: var(--background);
+}
+
+.actionArea > .notice:empty { display: none; }
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+
+.actionRow .notice { flex: 1 1 16rem; }
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -66,6 +105,6 @@
 .actions a[aria-disabled="true"] { color: var(--muted); cursor: wait; }
 
 .error {
-  margin-block: 1.5rem 0;
+  margin: 0;
   font-weight: 600;
 }
