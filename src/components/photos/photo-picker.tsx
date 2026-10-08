@@ -6,6 +6,7 @@ import type { InsertImage } from "@/lib/post-content";
 import styles from "./photo-picker.module.css";
 
 type UploadTicket = { key: string; uploadUrl: string; receipt: string; headers: Record<string, string> };
+type UploadAttempt = { file: File; ticket?: UploadTicket; photo?: Photo };
 
 class PhotoRequestError extends Error {
   constructor(message: string, public status: number) { super(message); }
@@ -74,103 +75,145 @@ function PhotoItem({ photo, busy, confirming, onSelect, onConfirm, onCancel, onD
   );
 }
 
-export function PhotoPicker({ onSelect }: { onSelect: (image: InsertImage) => void }) {
+export function PhotoPicker({ onSelect, onUploadPendingChange }: {
+  onSelect: (image: InsertImage) => void;
+  onUploadPendingChange?: (pending: boolean) => void;
+}) {
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [file, setFile] = useState<File | null>(null);
-  const [uploadedTicket, setUploadedTicket] = useState<UploadTicket | null>(null);
+  const attempt = useRef<UploadAttempt | null>(null);
+  // A synchronous lock also guards events before React commits disabled controls.
+  const operation = useRef(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
-  const [error, setError] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const [libraryError, setLibraryError] = useState("");
   const [confirmKey, setConfirmKey] = useState<string | null>(null);
   const invalidFile = file !== null && !validPhotoFile(file);
 
   useEffect(() => {
     let active = true;
     request<{ photos: Photo[] }>("/api/photos")
-      .then((result) => { if (active) setPhotos(result.photos); })
-      .catch(() => { if (active) setError("Photos could not load. Use Refresh photos to retry."); })
+      .then((result) => {
+        if (active) setPhotos((current) => [...current, ...result.photos.filter((photo) => !current.some((existing) => existing.key === photo.key))]);
+      })
+      .catch(() => { if (active) setLibraryError("Photos could not load. Use Refresh photos to retry."); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
 
   async function refresh() {
-    setLoading(true); setError("");
-    try { setPhotos((await request<{ photos: Photo[] }>("/api/photos")).photos); }
-    catch (error) { setError(error instanceof Error ? error.message : "Photos could not load. Retry refreshing."); }
+    if (loading || operation.current) return;
+    const knownKeys = new Set(photos.map((photo) => photo.key));
+    setLoading(true); setLibraryError("");
+    try {
+      const result = await request<{ photos: Photo[] }>("/api/photos");
+      // A photo may finish uploading while the library request is in flight.
+      setPhotos((current) => {
+        const additions = current.filter((photo) => !knownKeys.has(photo.key));
+        return [...additions, ...result.photos.filter((photo) => !additions.some((added) => added.key === photo.key))];
+      });
+    }
+    catch (error) { setLibraryError(error instanceof Error ? error.message : "Photos could not load. Retry refreshing."); }
     finally { setLoading(false); }
   }
 
   function choose(event: ChangeEvent<HTMLInputElement>) {
-    const next = event.target.files?.[0] ?? null;
-    setFile(next); setUploadedTicket(null); setError(""); setStatus("");
-    if (next && !validPhotoFile(next)) {
-      setError("Choose a JPEG, PNG, WebP or GIF photo, up to 10 MB.");
+    const next = event.target.files?.[0];
+    if (!next || operation.current) return;
+    setFile(next); setUploadError(""); setStatus("");
+    attempt.current = null;
+    if (!validPhotoFile(next)) {
+      setUploadError("Choose a JPEG, PNG, WebP or GIF photo, up to 10 MB.");
+      return;
     }
+    attempt.current = { file: next };
+    void upload();
   }
 
   async function upload() {
-    if (!file || !validPhotoFile(file) || busy) return;
-    setBusy(true); setError(""); setStatus("Preparing upload…");
+    const current = attempt.current;
+    if (!current || operation.current) return;
+    operation.current = true;
+    setBusy(true); setUploadError("");
+    onUploadPendingChange?.(true);
     try {
-      let ticket = uploadedTicket;
-      if (!ticket) {
-        ticket = await request<UploadTicket>("/api/photos/upload-url", json("POST", { contentType: file.type, size: file.size }));
-        setStatus("Uploading directly to storage…");
+      if (!current.ticket) {
+        setStatus("Preparing upload…");
+        const ticket = await request<UploadTicket>("/api/photos/upload-url", json("POST", { contentType: current.file.type, size: current.file.size }));
+        setStatus("Uploading photo…");
         let response: Response;
         const signal = AbortSignal.timeout(60_000);
-        try { response = await fetch(ticket.uploadUrl, { method: "PUT", headers: ticket.headers, body: file, signal }); }
-        catch { throw new Error(signal.aborted ? "Storage upload timed out. Your file is retained; retry uploading." : "Storage could not be reached. Check your connection and retry uploading."); }
-        if (!response.ok) throw new Error("Storage did not accept the upload. Retry uploading the photo.");
-        setUploadedTicket(ticket);
+        try { response = await fetch(ticket.uploadUrl, { method: "PUT", headers: ticket.headers, body: current.file, signal }); }
+        catch { throw new Error(signal.aborted ? "Storage upload timed out. Retry adding your photo." : "Storage could not be reached. Check your connection and retry."); }
+        if (!response.ok) throw new Error("Storage did not accept the upload. Retry adding your photo.");
+        current.ticket = ticket;
       }
-      setStatus("Checking uploaded photo…");
-      const { photo } = await request<{ photo: Photo }>("/api/photos/complete", json("POST", { receipt: ticket.receipt }));
-      setPhotos((current) => [photo, ...current.filter((existing) => existing.key !== photo.key)]);
-      setFile(null); setUploadedTicket(null);
+      if (!current.photo) {
+        setStatus("Checking uploaded photo…");
+        const { photo } = await request<{ photo: Photo }>("/api/photos/complete", json("POST", { receipt: current.ticket.receipt }));
+        current.photo = photo;
+        setPhotos((photos) => [photo, ...photos.filter((existing) => existing.key !== photo.key)]);
+      }
+      setStatus("Inserting photo…");
+      onSelect({ key: current.photo.key, alt: "", url: current.photo.url });
+      attempt.current = null;
+      setFile(null);
       if (input.current) input.current.value = "";
-      setStatus("Photo uploaded. Insert it below, then add alt text in the editor.");
+      setStatus("Photo added. Add alt text in the editor.");
     } catch (error) {
-      if (error instanceof PhotoRequestError && error.status === 400) setUploadedTicket(null);
+      // Expired or invalid receipts cannot be reused; other completion failures
+      // retry only the check, without uploading the bytes again.
+      if (error instanceof PhotoRequestError && error.status === 400) current.ticket = undefined;
       setStatus("");
-      setError(error instanceof Error ? error.message : "Upload failed. Your file is retained; retry uploading.");
-    } finally { setBusy(false); }
+      setUploadError(error instanceof Error ? error.message : "Could not add the photo. Please retry.");
+    } finally {
+      onUploadPendingChange?.(false);
+      operation.current = false;
+      setBusy(false);
+    }
   }
 
   async function remove(key: string) {
-    if (busy) return;
-    setBusy(true); setError(""); setStatus("");
+    if (operation.current || loading) return;
+    operation.current = true;
+    setBusy(true); setLibraryError(""); setStatus("");
     try {
       await request("/api/photos", json("DELETE", { key }));
       setPhotos((current) => current.filter((photo) => photo.key !== key));
       setConfirmKey(null); setStatus("Photo deleted.");
-    } catch (error) { setError(error instanceof Error ? error.message : "Deletion failed. Please retry."); }
-    finally { setBusy(false); }
+    } catch (error) { setLibraryError(error instanceof Error ? error.message : "Deletion failed. Please retry."); }
+    finally { operation.current = false; setBusy(false); }
   }
 
-  return <section className={styles.picker} aria-labelledby={`${id}-title`} aria-busy={busy || loading}>
-    <div className={styles.heading}>
-      <h3 id={`${id}-title`}>Photos</h3>
-      <button type="button" disabled={busy || loading} onClick={() => void refresh()}>Refresh photos</button>
-    </div>
-    <p className={styles.hint} id={`${id}-hint`}>JPEG, PNG, WebP or GIF, up to 10 MB. Alt text is added to each image in the editor.</p>
+  return <section className={styles.picker} aria-labelledby={`${id}-title`}>
     <div className={styles.upload}>
-      <label htmlFor={`${id}-file`}>Choose a photo</label>
+      <h3 id={`${id}-title`}>Photos</h3>
+      <label className={styles.fileLabel} htmlFor={`${id}-file`}>Choose and add a photo</label>
       <input ref={input} id={`${id}-file`} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
-        aria-invalid={invalidFile || undefined} aria-describedby={`${id}-hint${invalidFile ? ` ${id}-error` : ""}`}
-        disabled={busy || loading} onChange={choose} />
-      <button type="button" disabled={!file || invalidFile || busy || loading} onClick={() => void upload()}>
-        {busy && file ? "Uploading…" : uploadedTicket ? "Retry checking upload" : error && file ? "Retry upload" : "Upload photo"}
-      </button>
+        aria-invalid={invalidFile || undefined} aria-describedby={`${id}-hint${uploadError ? ` ${id}-error` : ""}`}
+        disabled={busy} onChange={choose} />
+      {uploadError && file && !invalidFile && <button type="button" disabled={busy} onClick={() => void upload()}>Retry adding photo</button>}
     </div>
-    {error && <p id={`${id}-error`} className={styles.error} role="alert">{error}</p>}
-    <p className={styles.status} role="status">{status || (loading ? "Loading photos…" : "")}</p>
-    {!loading && !photos.length && !error && <p className={styles.empty}>No photos yet. Upload one to add it to your post.</p>}
-    <ul className={styles.grid}>{photos.map((photo) => <PhotoItem key={photo.key} photo={photo}
-      busy={busy || loading} confirming={confirmKey === photo.key} onSelect={onSelect}
-      onConfirm={() => { setConfirmKey(photo.key); setError(""); }} onCancel={() => setConfirmKey(null)}
-      onDelete={() => void remove(photo.key)} />)}</ul>
+    <p className={styles.hint} id={`${id}-hint`}>Uploads and inserts automatically. JPEG, PNG, WebP or GIF, up to 10 MB.</p>
+    {uploadError && <p id={`${id}-error`} className={styles.error} role="alert">{uploadError} {!invalidFile && "Your file is retained."}</p>}
+    <p className={styles.status} role="status">{status}</p>
+    <div className={styles.library} role="region" aria-labelledby={`${id}-library`} tabIndex={0}>
+      <div className={styles.heading}>
+        <h4 id={`${id}-library`}>Photo library</h4>
+        <button type="button" disabled={busy || loading} onClick={() => void refresh()}>Refresh photos</button>
+      </div>
+      {libraryError && <p className={styles.error} role="alert">{libraryError}</p>}
+      {loading && <p className={styles.status} role="status">Loading photos…</p>}
+      {!loading && !photos.length && !libraryError && <p className={styles.empty}>No photos yet. Choose one above to add it to your post.</p>}
+      <ul className={styles.grid}>{photos.map((photo) => <PhotoItem key={photo.key} photo={photo}
+        busy={busy || loading} confirming={confirmKey === photo.key}
+        onSelect={(image) => { if (!operation.current) onSelect(image); }}
+        onConfirm={() => { setConfirmKey(photo.key); setLibraryError(""); }} onCancel={() => setConfirmKey(null)}
+        onDelete={() => void remove(photo.key)} />)}</ul>
+    </div>
   </section>;
 }
