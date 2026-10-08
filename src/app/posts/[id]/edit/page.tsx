@@ -30,7 +30,7 @@ async function EditPostContent({ params }: EditPostProps) {
       <header className={styles.heading}>
         <h1 className={styles.title}>Edit post</h1>
       </header>
-      <div style={{ paddingBlockStart: "2rem" }}>
+      <div className={styles.composer}>
         <PostComposer key={post.id} initialPost={post} />
       </div>
     </>

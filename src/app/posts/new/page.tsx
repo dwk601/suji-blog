@@ -24,7 +24,7 @@ async function NewPostContent() {
       <header className={styles.heading}>
         <h1 className={styles.title}>New post</h1>
       </header>
-      <div style={{ paddingBlockStart: "2rem" }}>
+      <div className={styles.composer}>
         <PostComposer />
       </div>
     </>
