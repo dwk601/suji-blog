@@ -9,11 +9,7 @@
   scroll-margin-block-end: calc(var(--composer-actions-height) + 1rem);
 }
 
-/* The visual viewport, not the layout viewport, determines whether both bars fit. */
-.form[data-short-viewport="true"] [aria-label="Text formatting"] {
-  position: static;
-}
-
+/* The editor releases its own toolbar; release this bar only when it alone would crowd out content. */
 .form[data-tiny-viewport="true"] .actionArea {
   position: static;
 }

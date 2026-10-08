@@ -32,7 +32,7 @@ export function PostForm({ initialPost, uploadPending, renderEditor }: PostFormP
     const actions = actionRef.current;
     if (!form || !actions) return;
     const viewport = window.visualViewport;
-    const toolbar = form.querySelector<HTMLElement>('[aria-label="Text formatting"]');
+    const toolbar = form.querySelector<HTMLElement>("[data-editor-toolbar]");
     let frame = 0;
 
     function keepFocusVisible() {
@@ -68,11 +68,9 @@ export function PostForm({ initialPost, uploadPending, renderEditor }: PostFormP
       if (!form || !actions) return;
       const height = viewport?.height ?? window.innerHeight;
       const actionHeight = actions.getBoundingClientRect().height;
-      const toolbarHeight = toolbar?.getBoundingClientRect().height ?? 0;
       const keyboardInset = Math.max(0, window.innerHeight - height - (viewport?.offsetTop ?? 0));
       form.style.setProperty("--composer-keyboard-inset", `${keyboardInset}px`);
       form.style.setProperty("--composer-actions-height", `${actionHeight}px`);
-      form.dataset.shortViewport = String(height < actionHeight + toolbarHeight + 96);
       form.dataset.tinyViewport = String(height < actionHeight + 96);
       scheduleFocusCheck();
     }
@@ -133,7 +131,7 @@ export function PostForm({ initialPost, uploadPending, renderEditor }: PostFormP
           {renderEditor({ value: content, onChange: setContent, disabled: pending || saved, photoUrls: initialPost?.photoUrls ?? {} })}
         </div>
       </fieldset>
-      <div ref={actionRef} className={styles.actionArea}>
+      <div ref={actionRef} className={styles.actionArea} data-composer-actions>
         {error && <p ref={errorRef} role="alert" tabIndex={-1} className={styles.error}>{error}</p>}
         <div className={styles.actionRow}>
           <div className={styles.actions}>

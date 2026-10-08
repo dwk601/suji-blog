@@ -115,12 +115,7 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
     function updateClearance() {
       if (!toolbar) return;
       const toolbarHeight = toolbar.offsetHeight;
-      // Measure the form's bottom sticky area without coupling to its CSS module.
-      const bottomBars = form ? Array.from(form.querySelectorAll<HTMLElement>("*")).filter((element) => {
-        const style = getComputedStyle(element);
-        return style.position === "sticky" && style.bottom !== "auto";
-      }) : [];
-      const bottomHeight = Math.max(0, ...bottomBars.map((element) => element.offsetHeight));
+      const bottomHeight = form?.querySelector<HTMLElement>("[data-composer-actions]")?.offsetHeight ?? 0;
       const availableHeight = viewport?.height ?? window.innerHeight;
       const keyboardOpen = !!viewport && (viewport.offsetTop > 0 || viewport.height < window.innerHeight * 0.75);
       const release = keyboardOpen || availableHeight < toolbarHeight + bottomHeight + 96;
@@ -184,7 +179,7 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
 
   return (
     <div className={styles.editor}>
-      <div ref={toolbarRef} className={styles.toolbar}>
+      <div ref={toolbarRef} className={styles.toolbar} data-editor-toolbar>
         <div className={styles.formatting} role="group" aria-label="Text formatting">
           {controls.map(({ label, active, run }) => <button key={label} type="button" aria-pressed={active} disabled={disabled} onClick={run}>{label}</button>)}
           <button type="button" disabled={!editor || disabled} aria-expanded={linkOpen} aria-controls={`${id}-link-panel`} onClick={() => {
