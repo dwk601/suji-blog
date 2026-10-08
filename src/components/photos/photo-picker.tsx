@@ -72,7 +72,7 @@ function PhotoItem({ photo, busy, confirming, onSelect, onConfirm }: {
 }
 
 export function PhotoPicker({ onSelect, onUploadPendingChange }: {
-  onSelect: (image: InsertImage) => void;
+  onSelect: (image: InsertImage) => boolean;
   onUploadPendingChange?: (pending: boolean) => void;
 }) {
   const id = useId();
@@ -157,7 +157,9 @@ export function PhotoPicker({ onSelect, onUploadPendingChange }: {
         setPhotos((photos) => [photo, ...photos.filter((existing) => existing.key !== photo.key)]);
       }
       setStatus("Inserting photo…");
-      onSelect({ key: current.photo.key, alt: "", url: current.photo.url });
+      if (!onSelect({ key: current.photo.key, alt: "", url: current.photo.url })) {
+        throw new Error("Your photo uploaded but couldn't be inserted into the post.");
+      }
       attempt.current = null;
       setFile(null);
       if (input.current) input.current.value = "";

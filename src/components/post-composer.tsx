@@ -22,7 +22,7 @@ function ComposerSession({ initialPost }: { initialPost?: PostEditorData }) {
         <Editor
           {...props}
           renderPhotoPicker={({ insertImage }) => (
-            <PhotoPicker {...{ onSelect: insertImage, onUploadPendingChange: setUploadPending }} />
+            <PhotoPicker onSelect={insertImage} onUploadPendingChange={setUploadPending} />
           )}
         />
       )}

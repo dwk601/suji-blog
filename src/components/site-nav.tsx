@@ -5,23 +5,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./site-header.module.css";
 
+type NavHref = "/" | "/posts" | "/posts/new" | "/posts/manage" | "/settings" | "/sign-in" | "/sign-up";
+
+// Editing a post is a management task, so it belongs under Manage posts.
+function currentSection(pathname: string): string {
+  if (pathname === "/posts/new" || pathname.startsWith("/posts/new/")) return "/posts/new";
+  if (pathname === "/posts/manage" || pathname.startsWith("/posts/manage/") || /^\/posts\/[^/]+\/edit\/?$/.test(pathname)) return "/posts/manage";
+  if (pathname.startsWith("/posts/")) return "/posts";
+  return pathname;
+}
+
 export function SiteNavLink({
   href,
   children,
 }: {
-  href: "/" | "/posts" | "/posts/new" | "/posts/manage" | "/settings" | "/sign-in" | "/sign-up";
+  href: NavHref;
   children: ReactNode;
 }) {
-  const pathname = usePathname();
-  const isCurrent =
-    pathname === href ||
-    (href === "/posts" &&
-      pathname.startsWith("/posts/") &&
-      pathname !== "/posts/new" &&
-      !pathname.startsWith("/posts/new/") &&
-      pathname !== "/posts/manage" &&
-      !pathname.startsWith("/posts/manage/")) ||
-    (href === "/posts/manage" && pathname.startsWith("/posts/manage/"));
+  const isCurrent = currentSection(usePathname()) === href;
 
   return (
     <li>

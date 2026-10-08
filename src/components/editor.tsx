@@ -48,7 +48,7 @@ export type EditorProps = {
   onChange: (value: JSONContent) => void;
   photoUrls?: PhotoUrls;
   disabled?: boolean;
-  renderPhotoPicker?: (props: { insertImage: (image: InsertImage) => void }) => ReactNode;
+  renderPhotoPicker?: (props: { insertImage: (image: InsertImage) => boolean }) => ReactNode;
 };
 
 export function Editor({ value, onChange, photoUrls = {}, disabled = false, renderPhotoPicker }: EditorProps) {
@@ -117,9 +117,11 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
       const toolbarHeight = toolbar.offsetHeight;
       const bottomHeight = form?.querySelector<HTMLElement>("[data-composer-actions]")?.offsetHeight ?? 0;
       const availableHeight = viewport?.height ?? window.innerHeight;
-      const keyboardOpen = !!viewport && (viewport.offsetTop > 0 || viewport.height < window.innerHeight * 0.75);
-      const release = keyboardOpen || availableHeight < toolbarHeight + bottomHeight + 96;
+      const release = availableHeight < toolbarHeight + bottomHeight + 96;
       toolbar.dataset.static = String(release);
+      // A mobile keyboard can pan the visual viewport below the layout
+      // viewport's top, where `top: 0` would hide the toolbar.
+      toolbar.style.top = `${viewport?.offsetTop ?? 0}px`;
       toolbar.parentElement?.style.setProperty("--editor-toolbar-clearance", release ? "1rem" : `${toolbarHeight + 16}px`);
       editor?.view.setProps({ scrollMargin: { top: release ? 16 : toolbarHeight + 16, bottom: bottomHeight + 16, left: 16, right: 16 } });
     }
@@ -139,16 +141,17 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
   }, [editor]);
 
   const insertImage = useCallback((image: InsertImage) => {
-    if (!editor || disabled) return;
+    if (!editor || disabled) return false;
     if (!isPhotoKey(image.key) || typeof image.alt !== "string" || image.alt.length > 1000 || !/^https?:\/\//i.test(image.url)) {
       setError("This photo couldn't be inserted. Select a stored photo and try again.");
-      return;
+      return false;
     }
     setInsertedUrls((urls) => ({ ...urls, [image.key]: image.url }));
     const selection = photoSelection.current?.resolve(editor.state.doc) ?? editor.state.selection;
     photoSelection.current = null;
     editor.chain().command(({ tr }) => { tr.setSelection(selection); return true; }).insertContent({ type: "image", attrs: { key: image.key, alt: image.alt } }).focus().scrollIntoView().run();
     setError("");
+    return true;
   }, [editor, disabled]);
 
   function applyLink() {
