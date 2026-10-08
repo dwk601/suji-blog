@@ -3,8 +3,12 @@ import "server-only";
 import { PhotoError } from "@/lib/photos";
 
 export async function readPhotoBody(request: Request): Promise<Record<string, unknown>> {
-  const origin = new URL(process.env.BETTER_AUTH_URL ?? request.url).origin;
-  if (request.headers.get("origin") !== origin) {
+  // Next dev can normalize request.url to localhost. Host is the browser's
+  // actual destination; don't substitute the canonical auth or forwarded host.
+  const target = new URL(request.url);
+  const host = request.headers.get("host");
+  if (host) target.host = host;
+  if (request.headers.get("origin") !== target.origin) {
     throw new PhotoError("Photo requests must come from this website.", 403);
   }
   if (request.headers.get("content-type")?.split(";")[0].trim() !== "application/json") {

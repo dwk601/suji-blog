@@ -48,8 +48,9 @@ function signature(payload: string) {
 function readReceipt(value: unknown): UploadReceipt {
   const invalid = () => new PhotoError("This upload authorization is invalid or expired. Choose the photo again.", 400);
   if (typeof value !== "string" || value.length > 2048) throw invalid();
-  const [payload, encodedSignature, extra] = value.split(".");
-  if (!payload || !encodedSignature || extra) throw invalid();
+  const parts = value.split(".");
+  const [payload, encodedSignature] = parts;
+  if (parts.length !== 2 || !payload || !encodedSignature) throw invalid();
   const supplied = Buffer.from(encodedSignature, "base64url");
   const expected = signature(payload);
   if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) throw invalid();

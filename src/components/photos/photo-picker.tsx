@@ -12,14 +12,20 @@ class PhotoRequestError extends Error {
 }
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const signal = options?.signal ?? AbortSignal.timeout(20_000);
   let response: Response;
-  try { response = await fetch(url, { ...options, cache: "no-store" }); }
-  catch { throw new Error("Photos could not be reached. Check your connection and retry."); }
+  try { response = await fetch(url, { ...options, signal, cache: "no-store" }); }
+  catch { throw new Error(signal.aborted ? "Photos took too long to respond. Please retry." : "Photos could not be reached. Check your connection and retry."); }
   let result;
   try { result = await response.json(); }
-  catch { throw new Error("The photo response was interrupted. Please retry."); }
+  catch { throw new Error(signal.aborted ? "Photos took too long to respond. Please retry." : "The photo response was interrupted. Please retry."); }
   if (!response.ok) throw new PhotoRequestError(result.error || "Photos are unavailable. Please retry.", response.status);
   return result as T;
+}
+
+function validPhotoFile(file: File): boolean {
+  return ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)
+    && file.size >= 1 && file.size <= 10 * 1024 * 1024;
 }
 
 function json(method: string, body: unknown): RequestInit {
@@ -79,6 +85,7 @@ export function PhotoPicker({ onSelect }: { onSelect: (image: InsertImage) => vo
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [confirmKey, setConfirmKey] = useState<string | null>(null);
+  const invalidFile = file !== null && !validPhotoFile(file);
 
   useEffect(() => {
     let active = true;
@@ -99,13 +106,13 @@ export function PhotoPicker({ onSelect }: { onSelect: (image: InsertImage) => vo
   function choose(event: ChangeEvent<HTMLInputElement>) {
     const next = event.target.files?.[0] ?? null;
     setFile(next); setUploadedTicket(null); setError(""); setStatus("");
-    if (next && (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(next.type) || next.size < 1 || next.size > 10 * 1024 * 1024)) {
+    if (next && !validPhotoFile(next)) {
       setError("Choose a JPEG, PNG, WebP or GIF photo, up to 10 MB.");
     }
   }
 
   async function upload() {
-    if (!file || busy) return;
+    if (!file || !validPhotoFile(file) || busy) return;
     setBusy(true); setError(""); setStatus("Preparing upload…");
     try {
       let ticket = uploadedTicket;
@@ -113,8 +120,9 @@ export function PhotoPicker({ onSelect }: { onSelect: (image: InsertImage) => vo
         ticket = await request<UploadTicket>("/api/photos/upload-url", json("POST", { contentType: file.type, size: file.size }));
         setStatus("Uploading directly to storage…");
         let response: Response;
-        try { response = await fetch(ticket.uploadUrl, { method: "PUT", headers: ticket.headers, body: file }); }
-        catch { throw new Error("Storage could not be reached. Check your connection and retry uploading."); }
+        const signal = AbortSignal.timeout(60_000);
+        try { response = await fetch(ticket.uploadUrl, { method: "PUT", headers: ticket.headers, body: file, signal }); }
+        catch { throw new Error(signal.aborted ? "Storage upload timed out. Your file is retained; retry uploading." : "Storage could not be reached. Check your connection and retry uploading."); }
         if (!response.ok) throw new Error("Storage did not accept the upload. Retry uploading the photo.");
         setUploadedTicket(ticket);
       }
@@ -151,12 +159,13 @@ export function PhotoPicker({ onSelect }: { onSelect: (image: InsertImage) => vo
     <div className={styles.upload}>
       <label htmlFor={`${id}-file`}>Choose a photo</label>
       <input ref={input} id={`${id}-file`} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
-        aria-describedby={`${id}-hint`} disabled={busy || loading} onChange={choose} />
-      <button type="button" disabled={!file || busy || loading} onClick={() => void upload()}>
+        aria-invalid={invalidFile || undefined} aria-describedby={`${id}-hint${invalidFile ? ` ${id}-error` : ""}`}
+        disabled={busy || loading} onChange={choose} />
+      <button type="button" disabled={!file || invalidFile || busy || loading} onClick={() => void upload()}>
         {busy && file ? "Uploading…" : uploadedTicket ? "Retry checking upload" : error && file ? "Retry upload" : "Upload photo"}
       </button>
     </div>
-    {error && <p className={styles.error} role="alert">{error}</p>}
+    {error && <p id={`${id}-error`} className={styles.error} role="alert">{error}</p>}
     <p className={styles.status} role="status">{status || (loading ? "Loading photos…" : "")}</p>
     {!loading && !photos.length && !error && <p className={styles.empty}>No photos yet. Upload one to add it to your post.</p>}
     <ul className={styles.grid}>{photos.map((photo) => <PhotoItem key={photo.key} photo={photo}
