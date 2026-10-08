@@ -4,16 +4,38 @@
 }
 
 .toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding-block-start: env(safe-area-inset-top, 0px);
+  background: var(--background);
+  border-block-end: 1px solid var(--border);
+}
+
+.toolbar[data-static="true"] {
+  position: static;
+}
+
+.formatting {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
-  padding: 0.75rem;
-  border-block-end: 1px solid var(--border);
+  gap: 0.125rem;
+  padding: 0.5rem;
+}
+
+.formatting button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.editor :where(input, button, :global(.tiptap), .image) {
+  scroll-margin-block-start: var(--editor-toolbar-clearance, 8rem);
+  scroll-margin-block-end: calc(10rem + env(safe-area-inset-bottom, 0px));
 }
 
 .editor button {
   min-height: 44px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem;
   border: 1px solid transparent;
   background: var(--background);
   color: var(--foreground);
@@ -46,6 +68,11 @@
   outline-offset: 0.5rem;
 }
 
+.editable :global(.tiptap) :where(p, h2, h3, pre, blockquote) {
+  scroll-margin-block-start: var(--editor-toolbar-clearance, 8rem);
+  scroll-margin-block-end: calc(10rem + env(safe-area-inset-bottom, 0px));
+}
+
 .editable :global(.tiptap[contenteditable="false"]) {
   color: var(--muted);
 }
@@ -65,7 +92,7 @@
   outline-offset: 4px;
 }
 
-.image span {
+.image > span {
   display: block;
   padding: 1rem;
   border: 1px dashed var(--border);
@@ -77,6 +104,14 @@
   gap: 0.5rem;
   padding: 1rem;
   border-block-start: 1px solid var(--border);
+}
+
+.image .fields {
+  margin-block-start: 0.75rem;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .fields label {
@@ -123,11 +158,16 @@
 }
 
 .picker {
-  padding: 1rem;
-  border-block-start: 1px solid var(--border);
+  padding: 0.75rem;
+  border-block-end: 1px solid var(--border);
 }
 
 @media (max-width: 40rem) {
   .editable { padding: 1rem; }
-  .toolbar { padding: 0.5rem; }
+  .formatting {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .image .fields { padding: 0.75rem 0; }
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useId, useMemo, useState, type ReactNode } from "react";
-import { NodeSelection } from "@tiptap/pm/state";
+import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { NodeSelection, type SelectionBookmark } from "@tiptap/pm/state";
 import { EditorContent, NodeViewWrapper, ReactNodeViewRenderer, useEditor, useEditorState, type NodeViewProps } from "@tiptap/react";
 import { createPostExtensions, isPhotoKey, isSafeLink, type InsertImage, type JSONContent, type PhotoUrls } from "@/lib/post-content";
 import contentStyles from "./post-content.module.css";
@@ -9,7 +9,8 @@ import styles from "./editor.module.css";
 
 const ImageUrls = createContext<PhotoUrls>({});
 
-function EditorImage({ node }: NodeViewProps) {
+function EditorImage({ node, selected, editor, updateAttributes, deleteNode, getPos }: NodeViewProps) {
+  const id = useId();
   const urls = useContext(ImageUrls);
   const url = urls[node.attrs.key];
   return (
@@ -19,6 +20,25 @@ function EditorImage({ node }: NodeViewProps) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url} alt={node.attrs.alt} draggable="true" data-drag-handle />
       ) : <span>Photo preview unavailable. Select this photo to edit or remove it.</span>}
+      {selected && (
+        <div className={styles.fields} contentEditable={false} data-photo-controls>
+          <label htmlFor={`${id}-alt`}>Photo description (alt text)</label>
+          <div className={styles.fieldRow}>
+            <input id={`${id}-alt`} value={node.attrs.alt ?? ""} disabled={!editor.isEditable} maxLength={1000} aria-describedby={`${id}-alt-hint`} onChange={(event) => updateAttributes({ alt: event.target.value })} onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === "Escape") {
+                event.preventDefault();
+                editor.commands.focus();
+              }
+            }} />
+            <button type="button" disabled={!editor.isEditable} onClick={() => {
+              const position = getPos();
+              deleteNode();
+              editor.commands.focus(position);
+            }}>Remove photo</button>
+          </div>
+          <p id={`${id}-alt-hint`}>Describe what matters in this image. Leave blank only if it is decorative.</p>
+        </div>
+      )}
     </NodeViewWrapper>
   );
 }
@@ -37,6 +57,8 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
   const [linkOpen, setLinkOpen] = useState(false);
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const photoSelection = useRef<SelectionBookmark | null>(null);
   const extensions = useMemo(() => createPostExtensions({ imageNodeView: ReactNodeViewRenderer(EditorImage) }), []);
   const editor = useEditor({
     extensions,
@@ -49,7 +71,7 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
         pointerdown(view, event) {
           if (!view.editable || event.button !== 0 || !(event.target instanceof HTMLElement)) return false;
           const image = event.target.closest("[data-photo-key]");
-          if (!image) return false;
+          if (!image || event.target.closest("[data-photo-controls]")) return false;
           // Handle selection in the editor's native event layer, not a React
           // portal that can be replaced as the editor receives focus.
           const position = view.posAtDOM(image, 0);
@@ -61,6 +83,11 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
       },
     },
     onUpdate: ({ editor }) => onChange(editor.getJSON()),
+    onTransaction: ({ transaction }) => {
+      // An upload may finish after more typing. Track the original insertion
+      // point through those edits instead of inserting at an unrelated caret.
+      if (photoSelection.current) photoSelection.current = photoSelection.current.map(transaction.mapping);
+    },
   });
   const state = useEditorState({
     editor,
@@ -69,9 +96,7 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
       heading2: editor.isActive("heading", { level: 2 }), heading3: editor.isActive("heading", { level: 3 }),
       bulletList: editor.isActive("bulletList"), orderedList: editor.isActive("orderedList"),
       blockquote: editor.isActive("blockquote"), codeBlock: editor.isActive("codeBlock"), code: editor.isActive("code"),
-      link: editor.isActive("link"), image: editor.isActive("image"),
-      imageKey: editor.getAttributes("image").key as string | undefined,
-      imageAlt: (editor.getAttributes("image").alt ?? "") as string,
+      link: editor.isActive("link"),
       undo: editor.can().undo(), redo: editor.can().redo(),
     } : null,
   });
@@ -82,17 +107,54 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
     }
   }, [editor, value]);
   useEffect(() => { editor?.setEditable(!disabled); }, [editor, disabled]);
+  useEffect(() => {
+    const toolbar = toolbarRef.current;
+    if (!toolbar) return;
+    const viewport = window.visualViewport;
+    const form = toolbar.closest("form");
+    function updateClearance() {
+      if (!toolbar) return;
+      const toolbarHeight = toolbar.offsetHeight;
+      // Measure the form's bottom sticky area without coupling to its CSS module.
+      const bottomBars = form ? Array.from(form.querySelectorAll<HTMLElement>("*")).filter((element) => {
+        const style = getComputedStyle(element);
+        return style.position === "sticky" && style.bottom !== "auto";
+      }) : [];
+      const bottomHeight = Math.max(0, ...bottomBars.map((element) => element.offsetHeight));
+      const availableHeight = viewport?.height ?? window.innerHeight;
+      const keyboardOpen = !!viewport && (viewport.offsetTop > 0 || viewport.height < window.innerHeight * 0.75);
+      const release = keyboardOpen || availableHeight < toolbarHeight + bottomHeight + 96;
+      toolbar.dataset.static = String(release);
+      toolbar.parentElement?.style.setProperty("--editor-toolbar-clearance", release ? "1rem" : `${toolbarHeight + 16}px`);
+      editor?.view.setProps({ scrollMargin: { top: release ? 16 : toolbarHeight + 16, bottom: bottomHeight + 16, left: 16, right: 16 } });
+    }
+    const observer = new ResizeObserver(updateClearance);
+    observer.observe(toolbar);
+    if (form) observer.observe(form);
+    updateClearance();
+    viewport?.addEventListener("resize", updateClearance);
+    viewport?.addEventListener("scroll", updateClearance);
+    window.addEventListener("resize", updateClearance);
+    return () => {
+      observer.disconnect();
+      viewport?.removeEventListener("resize", updateClearance);
+      viewport?.removeEventListener("scroll", updateClearance);
+      window.removeEventListener("resize", updateClearance);
+    };
+  }, [editor]);
 
-  function insertImage(image: InsertImage) {
+  const insertImage = useCallback((image: InsertImage) => {
     if (!editor || disabled) return;
     if (!isPhotoKey(image.key) || typeof image.alt !== "string" || image.alt.length > 1000 || !/^https?:\/\//i.test(image.url)) {
       setError("This photo couldn't be inserted. Select a stored photo and try again.");
       return;
     }
     setInsertedUrls((urls) => ({ ...urls, [image.key]: image.url }));
-    editor.chain().focus().insertContent({ type: "image", attrs: { key: image.key, alt: image.alt } }).run();
+    const selection = photoSelection.current?.resolve(editor.state.doc) ?? editor.state.selection;
+    photoSelection.current = null;
+    editor.chain().command(({ tr }) => { tr.setSelection(selection); return true; }).insertContent({ type: "image", attrs: { key: image.key, alt: image.alt } }).focus().scrollIntoView().run();
     setError("");
-  }
+  }, [editor, disabled]);
 
   function applyLink() {
     if (!editor) return;
@@ -122,46 +184,45 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
 
   return (
     <div className={styles.editor}>
-      <div className={styles.toolbar} role="group" aria-label="Text formatting">
-        {controls.map(({ label, active, run }) => <button key={label} type="button" aria-pressed={active} disabled={disabled} onClick={run}>{label}</button>)}
-        <button type="button" disabled={!editor || disabled} aria-expanded={linkOpen} aria-controls={`${id}-link-panel`} onClick={() => {
-          setLink(editor?.getAttributes("link").href ?? "");
-          setError("");
-          setLinkOpen(!linkOpen);
-        }}>Link</button>
-        <button type="button" disabled={disabled || !state?.link} onClick={() => { editor?.chain().focus().extendMarkRange("link").unsetLink().run(); setLinkOpen(false); }}>Remove link</button>
-        <button type="button" disabled={disabled || !state?.undo} onClick={() => editor?.chain().focus().undo().run()}>Undo</button>
-        <button type="button" disabled={disabled || !state?.redo} onClick={() => editor?.chain().focus().redo().run()}>Redo</button>
-      </div>
-      {linkOpen && (
-        <div className={styles.fields} id={`${id}-link-panel`}>
-          <label htmlFor={`${id}-link`}>Link address</label>
-          <div className={styles.fieldRow}>
-            <input id={`${id}-link`} value={link} disabled={disabled} maxLength={2048} placeholder="https://example.com" autoFocus aria-describedby={error ? `${id}-error` : undefined} onChange={(event) => setLink(event.target.value)} onKeyDown={(event) => {
-              if (event.key === "Enter") { event.preventDefault(); applyLink(); }
-              if (event.key === "Escape") { event.preventDefault(); setLinkOpen(false); editor?.commands.focus(); }
-            }} />
-            <button type="button" disabled={disabled} onClick={applyLink}>Apply link</button>
-            <button type="button" onClick={() => { setLinkOpen(false); setError(""); editor?.commands.focus(); }}>Cancel</button>
-          </div>
+      <div ref={toolbarRef} className={styles.toolbar}>
+        <div className={styles.formatting} role="group" aria-label="Text formatting">
+          {controls.map(({ label, active, run }) => <button key={label} type="button" aria-pressed={active} disabled={disabled} onClick={run}>{label}</button>)}
+          <button type="button" disabled={!editor || disabled} aria-expanded={linkOpen} aria-controls={`${id}-link-panel`} onClick={() => {
+            setLink(editor?.getAttributes("link").href ?? "");
+            setError("");
+            setLinkOpen(!linkOpen);
+          }}>Link</button>
+          <button type="button" disabled={disabled || !state?.link} onClick={() => { editor?.chain().focus().extendMarkRange("link").unsetLink().run(); setLinkOpen(false); }}>Remove link</button>
+          <button type="button" disabled={disabled || !state?.undo} onClick={() => editor?.chain().focus().undo().run()}>Undo</button>
+          <button type="button" disabled={disabled || !state?.redo} onClick={() => editor?.chain().focus().redo().run()}>Redo</button>
         </div>
-      )}
-      {error && <p className={styles.error} id={`${id}-error`} role="alert">{error}</p>}
+        {linkOpen && (
+          <div className={styles.fields} id={`${id}-link-panel`}>
+            <label htmlFor={`${id}-link`}>Link address</label>
+            <div className={styles.fieldRow}>
+              <input id={`${id}-link`} value={link} disabled={disabled} maxLength={2048} placeholder="https://example.com" autoFocus aria-describedby={error ? `${id}-error` : undefined} onChange={(event) => setLink(event.target.value)} onKeyDown={(event) => {
+                if (event.key === "Enter") { event.preventDefault(); applyLink(); }
+                if (event.key === "Escape") { event.preventDefault(); setLinkOpen(false); editor?.commands.focus(); }
+              }} />
+              <button type="button" disabled={disabled} onClick={applyLink}>Apply link</button>
+              <button type="button" onClick={() => { setLinkOpen(false); setError(""); editor?.commands.focus(); }}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {error && <p className={styles.error} id={`${id}-error`} role="alert">{error}</p>}
+      </div>
+      {editor && !disabled && renderPhotoPicker && <div className={styles.picker} onPointerDownCapture={(event) => {
+        if (!event.currentTarget.contains(document.activeElement)) photoSelection.current = editor.state.selection.getBookmark();
+      }} onFocusCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) photoSelection.current = editor.state.selection.getBookmark();
+      }}>
+        {/* eslint-disable-next-line react-hooks/refs -- The render prop builds UI; insertion only runs from picker events, never during render. */}
+        {renderPhotoPicker({ insertImage })}
+      </div>}
       {!editor && <p className={styles.loading} role="status">Loading editor…</p>}
       <ImageUrls.Provider value={{ ...photoUrls, ...insertedUrls }}>
         <EditorContent editor={editor} className={`${styles.editable} ${contentStyles.content}`} />
       </ImageUrls.Provider>
-      {state?.image && (
-        <div className={styles.fields} key={state.imageKey}>
-          <label htmlFor={`${id}-alt`}>Photo description (alt text)</label>
-          <div className={styles.fieldRow}>
-            <input id={`${id}-alt`} value={state.imageAlt} disabled={disabled} maxLength={1000} aria-describedby={`${id}-alt-hint`} onChange={(event) => editor?.commands.updateAttributes("image", { alt: event.target.value })} />
-            <button type="button" disabled={disabled} onClick={() => editor?.chain().focus().deleteSelection().run()}>Remove photo</button>
-          </div>
-          <p id={`${id}-alt-hint`}>Describe what matters in this image. Leave blank only if it is decorative.</p>
-        </div>
-      )}
-      {editor && !disabled && renderPhotoPicker && <div className={styles.picker}>{renderPhotoPicker({ insertImage })}</div>}
       <p className={styles.hint}>Select text to format it. Select a photo to change its description or remove it.</p>
     </div>
   );
