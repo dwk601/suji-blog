@@ -9,6 +9,7 @@ export async function SettingsLink() {
 
   return (
     <>
+      <SiteNavLink href="/posts/new">New post</SiteNavLink>
       <SiteNavLink href="/posts/manage">Manage posts</SiteNavLink>
       <SiteNavLink href="/settings">Settings</SiteNavLink>
     </>

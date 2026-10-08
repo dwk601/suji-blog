@@ -140,4 +140,8 @@
   .masthead {
     padding-block: 1rem 1.5rem;
   }
+
+  .links {
+    column-gap: 0.25rem;
+  }
 }

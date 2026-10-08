@@ -24,16 +24,23 @@ export async function PostArticle({ postId, comments }: { postId: string; commen
             <time dateTime={post.createdAt.toISOString()}>{dateFormat.format(post.createdAt)}</time>
             {post.updatedAt.getTime() > post.createdAt.getTime() && <> · Updated <time dateTime={post.updatedAt.toISOString()}>{dateFormat.format(post.updatedAt)}</time></>}
           </p>
+          <div className={styles.headingActions}>
+            {comments && <Link href="#comments" className={styles.discussion}>Join the discussion</Link>}
+            <Suspense fallback={null}><ArticleControls postId={post.id} title={post.title} /></Suspense>
+          </div>
         </header>
         <div className={styles.body}><PostContent content={post.content} /></div>
+        <footer className={styles.exit}>
+          <Link href="/posts" className={styles.exitLink}>All posts</Link>
+        </footer>
       </article>
-      <Suspense fallback={null}><ArticleControls postId={post.id} title={post.title} /></Suspense>
       {comments}
     </main>
   );
 }
 
 async function ArticleControls({ postId, title }: { postId: string; title: string }) {
-  if (!(await getSiteRole())) return null;
-  return <PostControls postId={postId} title={title} />;
+  const role = await getSiteRole();
+  if (role !== "admin" && role !== "owner") return null;
+  return <div className={styles.articleControls}><PostControls postId={postId} title={title} /></div>;
 }

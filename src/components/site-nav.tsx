@@ -9,7 +9,7 @@ export function SiteNavLink({
   href,
   children,
 }: {
-  href: "/" | "/posts" | "/posts/manage" | "/settings" | "/sign-in" | "/sign-up";
+  href: "/" | "/posts" | "/posts/new" | "/posts/manage" | "/settings" | "/sign-in" | "/sign-up";
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -17,7 +17,11 @@ export function SiteNavLink({
     pathname === href ||
     (href === "/posts" &&
       pathname.startsWith("/posts/") &&
-      !pathname.startsWith("/posts/manage"));
+      pathname !== "/posts/new" &&
+      !pathname.startsWith("/posts/new/") &&
+      pathname !== "/posts/manage" &&
+      !pathname.startsWith("/posts/manage/")) ||
+    (href === "/posts/manage" && pathname.startsWith("/posts/manage/"));
 
   return (
     <li>
