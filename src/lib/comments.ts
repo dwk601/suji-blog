@@ -3,6 +3,7 @@ import "server-only";
 import { and, asc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { headers } from "next/headers";
+import { connection } from "next/server";
 import { cache } from "react";
 import { db } from "@/db";
 import { comments, user } from "@/db/schema";
@@ -17,9 +18,22 @@ export type CommentViewer = { id: string; canModerate: boolean } | null;
 
 // React cache is request-local, not a persistent role/session cache.
 export const getCommentViewer = cache(async (): Promise<CommentViewer> => {
-  const session = await auth.api.getSession({ headers: await headers(), query: { disableCookieCache: true, disableRefresh: true } });
-  if (!session || session.user.banned) return null;
-  return { id: session.user.id, canModerate: session.user.role === "admin" || session.user.role === "owner" };
+  // Resolve request-time boundaries before accessing Better Auth's API getter.
+  // Keep them outside the catch so prerender control flow is never swallowed.
+  await connection();
+  const requestHeaders = await headers();
+  try {
+    const session = await auth.api.getSession({
+      headers: requestHeaders,
+      query: { disableCookieCache: true, disableRefresh: true },
+    });
+    if (!session || session.user.banned) return null;
+    return { id: session.user.id, canModerate: session.user.role === "admin" || session.user.role === "owner" };
+  } catch {
+    // Public reading survives a session outage; every write rejects a null viewer.
+    console.warn("Could not verify comment privileges.");
+    return null;
+  }
 });
 
 function validId(value: unknown): value is string {
