@@ -66,11 +66,10 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       }
 
       form.reset();
-      setSuccess(
-        registering
-          ? "Account created. Taking you to the posts…"
-          : "Signed in. Taking you to the posts…",
-      );
+      const destination = next.endsWith("#comment-form")
+        ? "back to the comment form"
+        : next === "/posts" ? "to the posts" : "back to the post";
+      setSuccess(`${registering ? "Account created." : "Signed in."} Taking you ${destination}…`);
       startTransition(() => {
         router.replace(next);
         router.refresh();
@@ -86,6 +85,10 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
 
   return (
     <>
+      <p className={styles.alternate}>
+        {registering ? "Already have an account?" : "New here?"}{" "}
+        <Link href={alternateHref}>{registering ? "Sign in" : "Create account"}</Link>
+      </p>
       <form method="post" className={styles.form} onSubmit={submit} aria-busy={pending}>
         <fieldset className={styles.fields} disabled={pending}>
           <legend className={styles.srOnly}>Account details</legend>
@@ -143,10 +146,6 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         )}
         {success && <p className={styles.message} role="status">{success}</p>}
       </form>
-      <p className={styles.alternate}>
-        {registering ? "Already have an account?" : "New here?"}{" "}
-        <Link href={alternateHref}>{registering ? "Sign in" : "Create an account"}</Link>
-      </p>
     </>
   );
 }

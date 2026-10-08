@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "@/lib/auth-client";
-import { SiteNavLink } from "@/components/site-nav";
+import { getNextPostPath } from "./next-path";
 import styles from "@/components/site-header.module.css";
 
 export function AccountNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, isPending, error: sessionError, refetch } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const [refreshing, startTransition] = useTransition();
@@ -46,7 +48,17 @@ export function AccountNav() {
     );
   }
 
-  if (!session) return <SiteNavLink href="/sign-in">Sign in</SiteNavLink>;
+  if (!session) {
+    const returnTo = getNextPostPath(pathname);
+    const href = returnTo === "/posts" ? "/sign-in" : `/sign-in?next=${encodeURIComponent(returnTo)}`;
+    return (
+      <li>
+        <Link href={href} className={styles.navLink} aria-current={pathname === "/sign-in" ? "page" : undefined}>
+          Sign in
+        </Link>
+      </li>
+    );
+  }
 
   return (
     <li className={styles.accountItem}>

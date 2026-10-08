@@ -12,13 +12,19 @@
   line-height: 1.2;
 }
 
+.section, .composer { scroll-margin-block-start: 1rem; }
+.composer { margin-block-end: 2rem; }
+.composer .form { margin-block-start: 0; }
 .list { margin: 0; padding: 0; list-style: none; }
 .comment { padding-block: 1.5rem; border-block-end: 1px solid var(--border); }
 .heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1rem; }
 .author { margin: 0; font: inherit; font-weight: 600; overflow-wrap: anywhere; }
 .body { margin-block: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-.empty, .signIn { margin-block: 0 1.5rem; color: var(--muted); }
-.signIn a { display: inline-block; min-height: 44px; color: var(--foreground); }
+.empty { margin-block: 0 1.5rem; color: var(--muted); }
+.signIn { color: var(--muted); }
+.signIn p { margin: 0; }
+.authActions { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+.authActions a { display: inline-flex; align-items: center; min-height: 44px; color: var(--foreground); }
 .hint { margin: 0; color: var(--muted); font-size: 0.875rem; }
 
 .form { display: grid; gap: 0.75rem; margin-block-start: 2rem; }

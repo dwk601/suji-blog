@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { createComment, deleteComment, getCommentViewer, getPublicComments, updateComment } from "@/lib/comments";
 import { getPublicPost } from "@/lib/public-posts";
+import { getNextPostPath } from "@/components/auth/next-path";
 import { CommentControls } from "./comment-controls";
 import { CommentForm } from "./comment-form";
 import styles from "./comments.module.css";
@@ -12,10 +13,12 @@ const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyl
 
 export function Comments({ postId }: { postId: string }) {
   return (
-    <section className={styles.section} aria-label="Comments">
+    <section id="comments" className={styles.section} aria-label="Comments">
       <h2 className={styles.title} tabIndex={-1}>Comments</h2>
+      <div id="comment-form" className={styles.composer} tabIndex={-1}>
+        <Suspense fallback={<p className={styles.hint} role="status">Loading comment form…</p>}><CommentComposer postId={postId} /></Suspense>
+      </div>
       <Suspense fallback={<p className={styles.hint} role="status">Loading comments…</p>}><CommentList postId={postId} /></Suspense>
-      <Suspense fallback={<p className={styles.hint} role="status">Loading comment form…</p>}><CommentComposer postId={postId} /></Suspense>
     </section>
   );
 }
@@ -48,7 +51,15 @@ async function CommentActions({ postId, commentId, authorId, body }: { postId: s
 async function CommentComposer({ postId }: { postId: string }) {
   if (!/^[a-zA-Z0-9_-]{1,128}$/.test(postId) || !(await getPublicPost(postId))) return null;
   const viewer = await getCommentViewer();
-  const returnTo = postId === "new" || postId === "manage" ? "/posts" : `/posts/${postId}`;
-  if (!viewer) return <p className={styles.signIn}><Link href={`/sign-in?next=${encodeURIComponent(returnTo)}`}>Sign in to leave a comment</Link>. Everyone can read the conversation.</p>;
+  const returnTo = encodeURIComponent(getNextPostPath(`/posts/${postId}#comment-form`));
+  if (!viewer) return (
+    <div className={styles.signIn}>
+      <p>Join the conversation. Everyone can read the comments.</p>
+      <div className={styles.authActions}>
+        <Link href={`/sign-in?next=${returnTo}`}>Sign in</Link>
+        <Link href={`/sign-up?next=${returnTo}`}>Create account</Link>
+      </div>
+    </div>
+  );
   return <CommentForm postId={postId} submitAction={createComment} />;
 }
