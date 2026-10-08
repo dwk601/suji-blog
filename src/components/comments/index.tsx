@@ -28,7 +28,7 @@ async function CommentList({ postId }: { postId: string }) {
   if (!comments.length) return <p className={styles.empty}>No comments yet. Start the conversation.</p>;
   return (
     <ol className={styles.list}>
-      {comments.map((comment) => <li key={comment.id} className={styles.comment}>
+      {[...comments].reverse().map((comment) => <li key={comment.id} className={styles.comment}>
         <article>
           <header className={styles.heading}>
             <h3 className={styles.author}>{comment.authorName}</h3>
