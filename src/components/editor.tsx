@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { NodeSelection } from "@tiptap/pm/state";
 import { EditorContent, NodeViewWrapper, ReactNodeViewRenderer, useEditor, useEditorState, type NodeViewProps } from "@tiptap/react";
 import { createPostExtensions, isPhotoKey, isSafeLink, type InsertImage, type JSONContent, type PhotoUrls } from "@/lib/post-content";
 import contentStyles from "./post-content.module.css";
@@ -42,7 +43,23 @@ export function Editor({ value, onChange, photoUrls = {}, disabled = false, rend
     content: value,
     immediatelyRender: false,
     editable: !disabled,
-    editorProps: { attributes: { role: "textbox", "aria-label": "Post content", "aria-multiline": "true" } },
+    editorProps: {
+      attributes: { role: "textbox", "aria-label": "Post content", "aria-multiline": "true" },
+      handleDOMEvents: {
+        pointerdown(view, event) {
+          if (!view.editable || event.button !== 0 || !(event.target instanceof HTMLElement)) return false;
+          const image = event.target.closest("[data-photo-key]");
+          if (!image) return false;
+          // Handle selection in the editor's native event layer, not a React
+          // portal that can be replaced as the editor receives focus.
+          const position = view.posAtDOM(image, 0);
+          view.focus();
+          view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, position)).setMeta("pointer", true));
+          // Keep native mouse/drag handling and keyboard selection unchanged.
+          return false;
+        },
+      },
+    },
     onUpdate: ({ editor }) => onChange(editor.getJSON()),
   });
   const state = useEditorState({
