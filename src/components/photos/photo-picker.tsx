@@ -33,44 +33,40 @@ function json(method: string, body: unknown): RequestInit {
   return { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
 }
 
-function PhotoItem({ photo, busy, confirming, onSelect, onConfirm, onCancel, onDelete }: {
+function PhotoItem({ photo, busy, confirming, onSelect, onConfirm }: {
   photo: Photo; busy: boolean; confirming: boolean; onSelect: (image: InsertImage) => void;
-  onConfirm: () => void; onCancel: () => void; onDelete: () => void;
+  onConfirm: () => void;
 }) {
   const [preview, setPreview] = useState<"loading" | "ready" | "failed">("loading");
   const [retry, setRetry] = useState(0);
-  const keepButton = useRef<HTMLButtonElement>(null);
   const deleteButton = useRef<HTMLButtonElement>(null);
   const wasConfirming = useRef(false);
   useEffect(() => {
-    if (confirming) keepButton.current?.focus();
-    else if (wasConfirming.current) deleteButton.current?.focus();
+    if (!confirming && wasConfirming.current) deleteButton.current?.focus();
     wasConfirming.current = confirming;
   }, [confirming]);
   const label = `photo ${photo.key.split("/").at(-1)}`;
   return (
     <li className={styles.photo}>
-      <div className={styles.preview}>
-        {/* Native images avoid routing the whole library through image optimization. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={retry ? `${photo.url}?preview=${retry}` : photo.url} alt="" loading="lazy"
-          onLoad={() => setPreview("ready")} onError={() => setPreview("failed")} />
-        {preview === "failed" && <p>Preview unavailable.</p>}
-      </div>
-      <p className={styles.metadata}>{photo.contentType.replace("image/", "").toUpperCase()} · {photo.size < 1024 ? `${photo.size} B` : `${(photo.size / 1024).toLocaleString(undefined, { maximumFractionDigits: 1 })} KB`}</p>
-      {preview === "failed" ? (
-        <button type="button" disabled={busy} onClick={() => { setPreview("loading"); setRetry(retry + 1); }}>Retry preview</button>
-      ) : (
-        <button type="button" aria-label={`Insert ${label}`} disabled={busy || preview !== "ready"}
-          onClick={() => onSelect({ key: photo.key, alt: "", url: photo.url })}>
-          {preview === "loading" ? "Loading preview…" : "Insert photo"}
-        </button>
-      )}
-      {confirming ? <div className={styles.confirm}>
-        <p>Delete this photo permanently? Photos used in a saved post cannot be deleted.</p>
-        <button type="button" disabled={busy} onClick={onDelete}>{busy ? "Deleting…" : "Delete permanently"}</button>
-        <button ref={keepButton} type="button" disabled={busy} onClick={onCancel}>Keep photo</button>
-      </div> : <button ref={deleteButton} type="button" disabled={busy} aria-label={`Delete ${label}`} onClick={onConfirm}>Delete</button>}
+      <button className={styles.insert} type="button"
+        title={`${photo.contentType.replace("image/", "").toUpperCase()} · ${(photo.size / 1024).toLocaleString(undefined, { maximumFractionDigits: 1 })} KB`}
+        aria-label={preview === "failed" ? `Retry preview for ${label}` : `Insert ${label}`}
+        disabled={busy || preview === "loading"}
+        onClick={() => {
+          if (preview === "failed") { setPreview("loading"); setRetry(retry + 1); }
+          else onSelect({ key: photo.key, alt: "", url: photo.url });
+        }}>
+        <span className={styles.preview}>
+          {/* Native images avoid routing the whole library through image optimization. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={retry ? `${photo.url}?preview=${retry}` : photo.url} alt="" loading="lazy"
+            onLoad={() => setPreview("ready")} onError={() => setPreview("failed")} />
+          {preview === "failed" && <span>Unavailable</span>}
+        </span>
+        <span>{preview === "failed" ? "Retry preview" : preview === "loading" ? "Loading…" : "Insert photo"}</span>
+      </button>
+      <button ref={deleteButton} className={styles.delete} type="button" disabled={busy}
+        aria-label={`Delete ${label}`} aria-expanded={confirming} onClick={onConfirm}>Delete</button>
     </li>
   );
 }
@@ -92,6 +88,8 @@ export function PhotoPicker({ onSelect, onUploadPendingChange }: {
   const [uploadError, setUploadError] = useState("");
   const [libraryError, setLibraryError] = useState("");
   const [confirmKey, setConfirmKey] = useState<string | null>(null);
+  const keepButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => { if (confirmKey) keepButton.current?.focus(); }, [confirmKey]);
   const invalidFile = file !== null && !validPhotoFile(file);
 
   useEffect(() => {
@@ -191,29 +189,31 @@ export function PhotoPicker({ onSelect, onUploadPendingChange }: {
 
   return <section className={styles.picker} aria-labelledby={`${id}-title`}>
     <div className={styles.upload}>
-      <h3 id={`${id}-title`}>Photos</h3>
+      <h3 className={styles.fileLabel} id={`${id}-title`}>Photos</h3>
       <label className={styles.fileLabel} htmlFor={`${id}-file`}>Choose and add a photo</label>
       <input ref={input} id={`${id}-file`} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
         aria-invalid={invalidFile || undefined} aria-describedby={`${id}-hint${uploadError ? ` ${id}-error` : ""}`}
         disabled={busy} onChange={choose} />
+      <button type="button" aria-label="Refresh photos" disabled={busy || loading} onClick={() => void refresh()}>Refresh</button>
       {uploadError && file && !invalidFile && <button type="button" disabled={busy} onClick={() => void upload()}>Retry adding photo</button>}
     </div>
-    <p className={styles.hint} id={`${id}-hint`}>Uploads and inserts automatically. JPEG, PNG, WebP or GIF, up to 10 MB.</p>
+    <p className={styles.hint} id={`${id}-hint`}>Auto-inserts. JPEG, PNG, WebP, GIF · Up to 10 MB.</p>
     {uploadError && <p id={`${id}-error`} className={styles.error} role="alert">{uploadError} {!invalidFile && "Your file is retained."}</p>}
     <p className={styles.status} role="status">{status}</p>
-    <div className={styles.library} role="region" aria-labelledby={`${id}-library`} tabIndex={0}>
-      <div className={styles.heading}>
-        <h4 id={`${id}-library`}>Photo library</h4>
-        <button type="button" disabled={busy || loading} onClick={() => void refresh()}>Refresh photos</button>
-      </div>
+    <div className={styles.library} role="region" aria-labelledby={`${id}-library`}>
+      <h4 className={styles.fileLabel} id={`${id}-library`}>Photo library</h4>
       {libraryError && <p className={styles.error} role="alert">{libraryError}</p>}
       {loading && <p className={styles.status} role="status">Loading photos…</p>}
       {!loading && !photos.length && !libraryError && <p className={styles.empty}>No photos yet. Choose one above to add it to your post.</p>}
-      <ul className={styles.grid}>{photos.map((photo) => <PhotoItem key={photo.key} photo={photo}
+      <ul className={styles.grid} aria-label="Stored photos" tabIndex={photos.length ? 0 : undefined}>{photos.map((photo) => <PhotoItem key={photo.key} photo={photo}
         busy={busy || loading} confirming={confirmKey === photo.key}
         onSelect={(image) => { if (!operation.current) onSelect(image); }}
-        onConfirm={() => { setConfirmKey(photo.key); setLibraryError(""); }} onCancel={() => setConfirmKey(null)}
-        onDelete={() => void remove(photo.key)} />)}</ul>
+        onConfirm={() => { setConfirmKey(photo.key); setLibraryError(""); }} />)}</ul>
+      {confirmKey && <div className={styles.confirm}>
+        <p>Delete this photo permanently? Photos used in a saved post cannot be deleted.</p>
+        <button type="button" disabled={busy} onClick={() => void remove(confirmKey)}>{busy ? "Deleting…" : "Delete permanently"}</button>
+        <button ref={keepButton} type="button" disabled={busy} onClick={() => setConfirmKey(null)}>Keep photo</button>
+      </div>}
     </div>
   </section>;
 }
