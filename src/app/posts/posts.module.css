@@ -96,6 +96,30 @@
   text-underline-offset: 0.35em;
 }
 
+.stateActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2rem;
+  margin-top: 2rem;
+}
+
+.stateActions .link {
+  margin-top: 0;
+}
+
+.retry {
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.retry:disabled {
+  color: var(--muted);
+  cursor: wait;
+}
+
 .link:hover {
   text-decoration-thickness: 2px;
 }

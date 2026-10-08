@@ -12,11 +12,10 @@ import styles from "./post-article.module.css";
 const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" });
 
 export async function PostArticle({ postId, comments }: { postId: string; comments?: ReactNode }) {
-  if (!/^[a-zA-Z0-9_-]{1,128}$/.test(postId)) notFound();
   const post = await getPublicPost(postId);
   if (!post) notFound();
   return (
-    <main id="main-content" className={styles.page}>
+    <main id="main-content" tabIndex={-1} className={styles.page}>
       <Link href="/posts" className={styles.back}>All posts</Link>
       <article>
         <header className={styles.heading}>

@@ -5,7 +5,7 @@ import styles from "./home.module.css";
 
 export default function Home() {
   return (
-    <main id="main-content" className={styles.page}>
+    <main id="main-content" tabIndex={-1} className={styles.page}>
       <section className={styles.hero} aria-labelledby="home-title">
         <h1 id="home-title" className={styles.title}>
           Suji Blog

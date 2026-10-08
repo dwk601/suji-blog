@@ -14,6 +14,7 @@ export type PublicPostSummary = Pick<PublicPost, "id" | "title" | "createdAt" | 
 export async function getPublicPost(id: string): Promise<PublicPost | null> {
   "use cache";
   cacheLife("hours");
+  if (!/^[a-zA-Z0-9_-]{1,128}$/.test(id)) return null;
   cacheTag(postTag(id));
 
   const [post] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);

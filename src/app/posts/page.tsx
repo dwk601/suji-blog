@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function PostsPage() {
   return (
-    <main id="main-content" className={styles.page}>
+    <main id="main-content" tabIndex={-1} className={styles.page}>
       <header className={styles.heading}>
         <h1 className={styles.title}>Posts</h1>
         <p className={styles.introduction}>
@@ -19,7 +19,14 @@ export default function PostsPage() {
         </p>
       </header>
 
-      <Suspense fallback={<p className={styles.description} role="status">Loading posts…</p>}><PostsList /></Suspense>
+      <Suspense fallback={
+        <section className={styles.empty}>
+          <p className={styles.description} role="status">Loading posts…</p>
+          <Link href="/" className={styles.link}>Back to home</Link>
+        </section>
+      }>
+        <PostsList />
+      </Suspense>
     </main>
   );
 }

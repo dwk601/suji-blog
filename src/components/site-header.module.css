@@ -7,6 +7,22 @@
   border-right-color: var(--border);
 }
 
+.skipLink {
+  position: absolute;
+  inset-block-start: 0.75rem;
+  inset-inline-start: 1.25rem;
+  z-index: 10;
+  max-width: calc(100% - 2.5rem);
+  padding: 0.625rem 1rem;
+  background: var(--background);
+  color: var(--foreground);
+  transform: translateY(-200%);
+}
+
+.skipLink:focus {
+  transform: translateY(0);
+}
+
 .header {
   width: min(100% - 3rem, 80rem);
   margin-inline: auto;
@@ -51,6 +67,9 @@
   min-height: 3rem;
   padding: 0.625rem 0.75rem;
   color: var(--muted);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
@@ -92,7 +111,14 @@
   font-size: 0.875rem;
 }
 
+.links > li {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .accountItem {
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -100,7 +126,8 @@
 }
 
 .accountError {
-  max-width: 28ch;
+  max-width: min(100%, 28ch);
+  overflow-wrap: anywhere;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
 }
