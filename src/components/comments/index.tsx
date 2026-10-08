@@ -13,7 +13,7 @@ const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyl
 export function Comments({ postId }: { postId: string }) {
   return (
     <section className={styles.section} aria-label="Comments">
-      <h2 className={styles.title}>Comments</h2>
+      <h2 className={styles.title} tabIndex={-1}>Comments</h2>
       <Suspense fallback={<p className={styles.hint} role="status">Loading comments…</p>}><CommentList postId={postId} /></Suspense>
       <Suspense fallback={<p className={styles.hint} role="status">Loading comment form…</p>}><CommentComposer postId={postId} /></Suspense>
     </section>
@@ -48,6 +48,7 @@ async function CommentActions({ postId, commentId, authorId, body }: { postId: s
 async function CommentComposer({ postId }: { postId: string }) {
   if (!/^[a-zA-Z0-9_-]{1,128}$/.test(postId) || !(await getPublicPost(postId))) return null;
   const viewer = await getCommentViewer();
-  if (!viewer) return <p className={styles.signIn}><Link href={`/sign-in?next=${encodeURIComponent(`/posts/${postId}`)}`}>Sign in to leave a comment</Link>. Everyone can read the conversation.</p>;
+  const returnTo = postId === "new" || postId === "manage" ? "/posts" : `/posts/${postId}`;
+  if (!viewer) return <p className={styles.signIn}><Link href={`/sign-in?next=${encodeURIComponent(returnTo)}`}>Sign in to leave a comment</Link>. Everyone can read the conversation.</p>;
   return <CommentForm postId={postId} submitAction={createComment} />;
 }
