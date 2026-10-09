@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { getPublicPosts } from "@/lib/public-posts";
+import { getPublicPageMetadata } from "@/lib/seo";
 import styles from "./posts.module.css";
 
-export const metadata: Metadata = {
-  title: "Posts | Suji Blog",
-  description: "The journal at Suji Blog. Thoughts, observations, and personal writing.",
-};
+export const metadata = getPublicPageMetadata(
+  "Posts | Suji Blog",
+  "Browse the Suji Blog journal: personal writing, everyday observations, and reflections, gathered in one place.",
+  "/posts",
+);
 
 export default function PostsPage() {
   return (

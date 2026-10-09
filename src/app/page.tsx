@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getPublicPosts } from "@/lib/public-posts";
+import { getPublicPageMetadata } from "@/lib/seo";
 import styles from "./home.module.css";
+
+export const metadata = getPublicPageMetadata(
+  "Suji Blog — A little space for life, in words",
+  "Welcome to Suji Blog: a personal journal of thoughts, observations, and the things worth keeping.",
+  "/",
+);
 
 export default function Home() {
   return (
