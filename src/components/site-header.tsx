@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { SettingsLink } from "./settings-link";
 import { AccountNav } from "./auth/account-nav";
 import { SiteNavLink } from "./site-nav";
+import { SiteMenu } from "./site-menu";
 import styles from "./site-header.module.css";
 
 export function SiteHeader() {
@@ -13,25 +14,31 @@ export function SiteHeader() {
           suji
         </Link>
       </div>
-      <nav aria-label="Main navigation" className={styles.navigation}>
-        <ul className={styles.links}>
-          <Suspense fallback={
+      <Suspense fallback={
+        <nav aria-label="Main navigation" className={styles.fallbackNavigation}>
+          <ul className={styles.fallbackLinks}>
+            <li><Link href="/" className={styles.navLink}>Home</Link></li>
+            <li><Link href="/posts" className={styles.navLink}>Posts</Link></li>
+          </ul>
+        </nav>
+      }>
+        <SiteMenu
+          navigation={
             <>
-              <li><Link href="/" className={styles.navLink}>Home</Link></li>
-              <li><Link href="/posts" className={styles.navLink}>Posts</Link></li>
+              <SiteNavLink href="/">Home</SiteNavLink>
+              <SiteNavLink href="/posts">Posts</SiteNavLink>
+              <Suspense fallback={null}>
+                <SettingsLink />
+              </Suspense>
             </>
-          }>
-            <SiteNavLink href="/">Home</SiteNavLink>
-            <SiteNavLink href="/posts">Posts</SiteNavLink>
-          </Suspense>
-          <Suspense fallback={null}>
-            <SettingsLink />
-          </Suspense>
-          <Suspense fallback={null}>
-            <AccountNav />
-          </Suspense>
-        </ul>
-      </nav>
+          }
+          account={
+            <Suspense fallback={null}>
+              <AccountNav />
+            </Suspense>
+          }
+        />
+      </Suspense>
     </header>
   );
 }
