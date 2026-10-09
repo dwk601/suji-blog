@@ -1,15 +1,18 @@
 .form {
   --composer-actions-height: 8rem;
   --composer-keyboard-inset: 0px;
+  min-width: 0;
   max-width: 60rem;
   margin-inline: auto;
+  background: var(--surface, #fff);
+  color: var(--foreground);
 }
 
 .form :is(input, textarea, select, [contenteditable="true"], [contenteditable="true"] *) {
   scroll-margin-block-end: calc(var(--composer-actions-height) + 1rem);
 }
 
-/* The editor releases its own toolbar; release this bar only when it alone would crowd out content. */
+/* Keep the existing viewport-aware release so the keyboard never crowds out writing. */
 .form[data-tiny-viewport="true"] .actionArea {
   position: static;
 }
@@ -23,15 +26,20 @@
   border: 0;
 }
 
-.titleField, .bodyField {
+.titleField,
+.bodyField {
   display: grid;
   min-width: 0;
   gap: 0.75rem;
 }
 
-.titleField label, .label {
+.titleField label,
+.label {
   margin: 0;
+  font-size: 0.8125rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .titleField input {
@@ -39,19 +47,34 @@
   min-width: 0;
   min-height: 3rem;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  background: var(--background);
+  border: 1px solid var(--muted);
+  border-radius: 0;
+  background: var(--surface, #fff);
   color: var(--foreground);
   font: inherit;
-  font-size: 1rem;
+  font-size: 1.125rem;
 }
 
-.titleField input:disabled { color: var(--muted); }
+.titleField input:hover:not(:disabled) {
+  border-color: var(--foreground);
+}
+
+.titleField input:disabled {
+  color: var(--muted);
+  cursor: wait;
+}
+
+.form :is(input, button, a):focus-visible,
+.error:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 4px;
+}
 
 .notice {
   margin: 0;
   color: var(--muted);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 .actionArea {
@@ -64,10 +87,12 @@
   padding-block: 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
   padding-inline: 0.5rem;
   border-block-start: 1px solid var(--border);
-  background: var(--background);
+  background: var(--surface, #fff);
 }
 
-.actionArea > .notice:empty { display: none; }
+.actionArea > .notice:empty {
+  display: none;
+}
 
 .actionRow {
   display: flex;
@@ -76,31 +101,65 @@
   gap: 0.5rem 1.5rem;
 }
 
-.actionRow .notice { flex: 1 1 16rem; }
+.actionRow .notice {
+  flex: 1 1 16rem;
+}
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.75rem 1.25rem;
 }
 
 .save {
   min-height: 3rem;
   padding: 0.75rem 1.5rem;
   border: 1px solid var(--foreground);
+  border-radius: 0;
   background: var(--foreground);
-  color: var(--background);
+  color: var(--surface, #fff);
   font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
-.save:hover:not(:disabled) { background: #333333; }
-.save:disabled { opacity: 0.65; cursor: wait; }
-.actions a { padding-block: 0.75rem; }
-.actions a[aria-disabled="true"] { color: var(--muted); cursor: wait; }
+.save:hover:not(:disabled) {
+  background: var(--surface, #fff);
+  color: var(--foreground);
+}
+
+.save:active:not(:disabled) {
+  background: var(--border);
+}
+
+.save:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 0.5rem;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.actions a[aria-disabled="true"] {
+  color: var(--muted);
+  cursor: wait;
+}
 
 .error {
   margin: 0;
+  color: var(--danger, #8c2020);
+  font-size: 0.9375rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }

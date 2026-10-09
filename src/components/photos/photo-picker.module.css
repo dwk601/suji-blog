@@ -1,29 +1,223 @@
-.picker { min-width: 0; }
-.picker button { min-height: 44px; padding: 0.5rem 0.75rem; border: 1px solid var(--border); background: var(--background); color: var(--foreground); font: inherit; font-size: 0.875rem; cursor: pointer; }
-.picker button:hover:not(:disabled) { border-color: var(--foreground); }
-.picker button:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.65; }
-.picker button:focus-visible, .upload input:focus-visible, .grid:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
-.hint, .status { color: var(--muted); font-size: 0.75rem; line-height: 1.5; }
-.hint { margin-block: 0.25rem; }
-.upload { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.fileLabel { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.upload input { min-width: 0; max-width: 100%; flex: 1 1 10rem; color: var(--foreground); font: inherit; font-size: 0.875rem; }
-.upload input::file-selector-button { min-height: 44px; margin-inline-end: 0.5rem; padding: 0.5rem 0.75rem; border: 1px solid var(--border); background: var(--background); color: var(--foreground); font: inherit; cursor: pointer; }
-.upload input:disabled { opacity: 0.65; cursor: not-allowed; }
-.error { margin-block: 0.5rem; font-size: 0.875rem; font-weight: 600; overflow-wrap: anywhere; }
-.status { margin-block: 0.25rem; }
-.status:empty { margin: 0; }
-.library { min-width: 0; margin-block-start: 0.25rem; }
-.empty { margin-block: 0.5rem; color: var(--muted); font-size: 0.875rem; }
-.grid { display: grid; grid-auto-flow: column; grid-auto-columns: 7rem; align-items: start; gap: 0.5rem; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-color: var(--border) var(--background); padding: 0.25rem; margin: 0; list-style: none; }
-.grid:empty { padding: 0; }
-.photo { min-width: 0; }
-.picker .insert { display: grid; width: 100%; padding: 0.125rem 0.25rem; font-size: 0.75rem; line-height: 1.25; }
-.preview { position: relative; display: block; height: 2rem; }
-.preview img { width: 100%; height: 100%; object-fit: contain; }
-.preview > span { position: absolute; inset: 0; display: grid; place-items: center; background: var(--background); color: var(--muted); }
-.picker .delete { width: 100%; padding: 0.25rem; border-color: transparent; font-size: 0.75rem; }
-.picker .delete[aria-expanded="true"] { text-decoration: underline; text-underline-offset: 0.2em; }
-.confirm { padding-block: 0.5rem; border-block-start: 1px solid var(--border); }
-.confirm p { margin-block: 0 0.5rem; font-size: 0.875rem; }
-.confirm button { margin-inline-end: 0.5rem; margin-block-end: 0.5rem; }
+.picker {
+  min-width: 0;
+  background: var(--surface, #fff);
+  color: var(--foreground);
+}
+
+.picker button {
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--muted);
+  border-radius: 0;
+  background: var(--surface, #fff);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.picker button:hover:not(:disabled) {
+  border-color: var(--foreground);
+}
+
+.picker button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.picker button:focus-visible,
+.upload input:focus-visible,
+.grid:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+.hint,
+.status {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  margin-block: 0.5rem;
+}
+
+.upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fileLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.upload input {
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 10rem;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.upload input::file-selector-button {
+  min-height: 44px;
+  margin-inline-end: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--muted);
+  border-radius: 0;
+  background: var(--surface, #fff);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.upload input:hover:not(:disabled)::file-selector-button {
+  border-color: var(--foreground);
+}
+
+.upload input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.upload input[aria-invalid="true"] {
+  color: var(--danger, #8c2020);
+}
+
+.error {
+  margin-block: 0.75rem;
+  color: var(--danger, #8c2020);
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  margin-block: 0.25rem;
+}
+
+.status:empty {
+  margin: 0;
+}
+
+.library {
+  min-width: 0;
+  margin-block-start: 0.5rem;
+}
+
+.empty {
+  margin-block: 0.75rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 7.5rem;
+  align-items: start;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-color: var(--muted) var(--surface, #fff);
+  scrollbar-width: thin;
+  padding: 0.25rem;
+  margin: 0;
+  list-style: none;
+}
+
+.grid:empty {
+  padding: 0;
+}
+
+.photo {
+  min-width: 0;
+}
+
+.picker .insert {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.preview {
+  position: relative;
+  display: block;
+  height: 4rem;
+}
+
+.preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.preview > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--surface, #fff);
+  color: var(--muted);
+}
+
+.picker .delete {
+  width: 100%;
+  padding: 0.5rem;
+  border-color: transparent;
+  color: var(--danger, #8c2020);
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.picker .delete[aria-expanded="true"] {
+  border-color: var(--danger, #8c2020);
+  text-decoration-thickness: 2px;
+}
+
+.confirm {
+  margin-block-start: 1rem;
+  padding-block: 1rem 0.5rem;
+  border-block-start: 1px solid var(--danger, #8c2020);
+}
+
+.confirm p {
+  max-width: 65ch;
+  margin-block: 0 0.75rem;
+  font-size: 0.875rem;
+}
+
+.confirm button {
+  margin-inline-end: 0.5rem;
+  margin-block-end: 0.5rem;
+}
+
+.confirm button:first-of-type {
+  border-color: var(--danger, #8c2020);
+  color: var(--danger, #8c2020);
+}
+
+.confirm button:first-of-type:hover:not(:disabled) {
+  background: var(--danger, #8c2020);
+  color: var(--surface, #fff);
+}
