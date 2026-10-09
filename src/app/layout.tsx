@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import styles from "@/components/site-header.module.css";
-import { editorial, geistMono, geistSans } from "@/lib/fonts";
+import { brand, editorial, geistMono, geistSans } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${editorial.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${editorial.variable} ${brand.variable} h-full antialiased`}
     >
       <body className={`${styles.shell} min-h-full flex flex-col`}>
         <a href="#main-content" className={styles.skipLink}>Skip to content</a>

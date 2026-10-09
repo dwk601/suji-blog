@@ -12,10 +12,13 @@
 @layer base {
   :root {
     color-scheme: light;
-    --background: #ffffff;
-    --foreground: #171717;
-    --muted: #666666;
-    --border: #dedede;
+    --background: #f4f4f4;
+    --surface: #ffffff;
+    --foreground: #111111;
+    --muted: #595959;
+    --border: #c9c9c9;
+    --frame-texture: url("/suji-paper.webp");
+    --font-brand: Georgia, "Times New Roman", serif;
     --font-editorial: "Bodoni MT", Didot, "Times New Roman", serif;
   }
 
@@ -63,7 +66,7 @@
 
   ::selection {
     background: var(--foreground);
-    color: var(--background);
+    color: var(--surface);
   }
 }
 
