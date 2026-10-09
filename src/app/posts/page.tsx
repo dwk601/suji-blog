@@ -19,12 +19,14 @@ export default function PostsPage() {
         </p>
       </header>
 
-      <Suspense fallback={
-        <section className={styles.empty}>
-          <p className={styles.description} role="status">Loading posts…</p>
-          <Link href="/" className={styles.link}>Back to home</Link>
-        </section>
-      }>
+      <Suspense
+        fallback={
+          <section className={styles.empty}>
+            <p className={styles.description} role="status">Loading posts…</p>
+            <Link href="/" className={styles.link}>Back to home</Link>
+          </section>
+        }
+      >
         <PostsList />
       </Suspense>
     </main>
@@ -33,15 +35,9 @@ export default function PostsPage() {
 
 async function PostsList() {
   const posts = await getPublicPosts();
-  if (posts.length) return (
-    <ul className={styles.list}>
-      {posts.map((post) => <li key={post.id} className={styles.row}>
-        <h2 className={styles.postTitle}><Link href={`/posts/${post.id}`}>{post.title}</Link></h2>
-        <time className={styles.date} dateTime={post.createdAt.toISOString()}>{new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" }).format(post.createdAt)}</time>
-      </li>)}
-    </ul>
-  );
-  return (
+
+  if (!posts.length) {
+    return (
       <section className={styles.empty} aria-labelledby="empty-title">
         <h2 id="empty-title" className={styles.emptyTitle}>
           No posts yet.
@@ -53,5 +49,24 @@ async function PostsList() {
           Back to home
         </Link>
       </section>
+    );
+  }
+
+  return (
+    <ul className={styles.list}>
+      {posts.map((post) => (
+        <li key={post.id} className={styles.row}>
+          <h2 className={styles.postTitle}>
+            <Link href={`/posts/${post.id}`}>{post.title}</Link>
+          </h2>
+          <time className={styles.date} dateTime={post.createdAt.toISOString()}>
+            {new Intl.DateTimeFormat("en", {
+              dateStyle: "long",
+              timeZone: "UTC",
+            }).format(post.createdAt)}
+          </time>
+        </li>
+      ))}
+    </ul>
   );
 }

@@ -10,45 +10,33 @@ export default function Home() {
         <h1 id="home-title" className={styles.title}>
           Suji Blog
         </h1>
-        <p className={styles.statement}>
-          A little space for
-          <br />
-          <em>life, in words.</em>
-        </p>
+        <p className={styles.statement}>A little space for life, in words.</p>
+        <div className={styles.introduction}>
+          <p>
+            Thoughts, observations, and the things worth keeping. Welcome to my
+            personal blog.
+          </p>
+        </div>
       </section>
 
-      <div className={styles.introduction}>
-        <p>
-          Thoughts, observations, and the things worth keeping. Welcome to my
-          personal blog.
-        </p>
-      </div>
-
       <section className={styles.journal} aria-labelledby="journal-title">
-        <div>
+        <div className={styles.journalHeading}>
           <h2 id="journal-title" className={styles.sectionTitle}>
             The journal
           </h2>
+          <Link href="/posts" className={styles.link}>
+            View posts
+          </Link>
         </div>
-        <Link href="/posts" className={styles.link}>
-          View posts
-          <svg
-            aria-hidden="true"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-          >
-            <path
-              d="M4 12h15m-6-6 6 6-6 6"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-        <Suspense fallback={<p className={styles.description} role="status">Loading posts…</p>}><LatestPosts /></Suspense>
+        <Suspense
+          fallback={
+            <p className={styles.state} role="status">
+              Loading posts…
+            </p>
+          }
+        >
+          <LatestPosts />
+        </Suspense>
       </section>
     </main>
   );
@@ -56,13 +44,30 @@ export default function Home() {
 
 async function LatestPosts() {
   const posts = (await getPublicPosts()).slice(0, 3);
-  if (!posts.length) return <p className={styles.description}>No posts yet. New writing will appear here.</p>;
+
+  if (!posts.length) {
+    return (
+      <p className={styles.state}>
+        No posts yet. New writing will appear here.
+      </p>
+    );
+  }
+
   return (
     <ul className={styles.postList}>
-      {posts.map((post) => <li key={post.id}>
-        <h3 className={styles.postTitle}><Link href={`/posts/${post.id}`}>{post.title}</Link></h3>
-        <time className={styles.description} dateTime={post.createdAt.toISOString()}>{new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" }).format(post.createdAt)}</time>
-      </li>)}
+      {posts.map((post) => (
+        <li key={post.id}>
+          <h3 className={styles.postTitle}>
+            <Link href={`/posts/${post.id}`}>{post.title}</Link>
+          </h3>
+          <time className={styles.date} dateTime={post.createdAt.toISOString()}>
+            {new Intl.DateTimeFormat("en", {
+              dateStyle: "medium",
+              timeZone: "UTC",
+            }).format(post.createdAt)}
+          </time>
+        </li>
+      ))}
     </ul>
   );
 }
