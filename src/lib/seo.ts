@@ -3,11 +3,14 @@ import type { Metadata } from "next";
 export const isPreviewDeployment = process.env.VERCEL_ENV === "preview";
 
 function getConfiguredSiteUrl(): URL {
-  const configuredUrl = process.env.SITE_URL?.trim();
+  const vercelProductionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  const configuredUrl =
+    process.env.SITE_URL?.trim() ||
+    (vercelProductionHost ? `https://${vercelProductionHost}` : undefined);
 
   if (!configuredUrl) {
     if (process.env.VERCEL_ENV === "production" || isPreviewDeployment) {
-      throw new Error("SITE_URL must be set to the confirmed HTTPS production origin before deploying.");
+      throw new Error("Set SITE_URL or deploy on Vercel so VERCEL_PROJECT_PRODUCTION_URL is available.");
     }
     return new URL("http://localhost:3000");
   }
