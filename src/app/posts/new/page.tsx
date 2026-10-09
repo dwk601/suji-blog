@@ -5,7 +5,11 @@ import { PostComposer } from "@/components/post-composer";
 import { getSiteRole } from "@/lib/site-role";
 import styles from "../manage/manage.module.css";
 
-export const metadata: Metadata = { title: "New post | Suji Blog" };
+export const metadata: Metadata = {
+  title: "New post | Suji Blog",
+  robots: { index: false, follow: true },
+  alternates: { canonical: null },
+};
 
 export default function NewPostPage() {
   return (

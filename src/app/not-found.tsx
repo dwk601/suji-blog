@@ -5,6 +5,8 @@ import styles from "./posts/posts.module.css";
 export const metadata: Metadata = {
   title: "Page not found | Suji Blog",
   description: "This page could not be found. Browse the Suji Blog journal instead.",
+  robots: { index: false, follow: true },
+  alternates: { canonical: null },
 };
 
 export default function NotFound() {

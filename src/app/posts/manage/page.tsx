@@ -7,7 +7,11 @@ import { getPublicPosts } from "@/lib/public-posts";
 import { getSiteRole } from "@/lib/site-role";
 import styles from "./manage.module.css";
 
-export const metadata: Metadata = { title: "Manage posts | Suji Blog" };
+export const metadata: Metadata = {
+  title: "Manage posts | Suji Blog",
+  robots: { index: false, follow: true },
+  alternates: { canonical: null },
+};
 
 export default function ManagePostsPage() {
   return (

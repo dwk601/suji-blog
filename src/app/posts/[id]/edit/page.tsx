@@ -6,7 +6,11 @@ import { getEditorPost } from "@/lib/posts";
 import { getSiteRole } from "@/lib/site-role";
 import styles from "../../manage/manage.module.css";
 
-export const metadata: Metadata = { title: "Edit post | Suji Blog" };
+export const metadata: Metadata = {
+  title: "Edit post | Suji Blog",
+  robots: { index: false, follow: true },
+  alternates: { canonical: null },
+};
 
 type EditPostProps = { params: Promise<{ id: string }> };
 

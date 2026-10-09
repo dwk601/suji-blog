@@ -8,7 +8,11 @@ import { OwnerSettings } from "@/components/owner-settings";
 import { getSiteRole } from "@/lib/site-role";
 import styles from "./settings.module.css";
 
-export const metadata: Metadata = { title: "Settings | Suji Blog" };
+export const metadata: Metadata = {
+  title: "Settings | Suji Blog",
+  robots: { index: false, follow: true },
+  alternates: { canonical: null },
+};
 
 export default function SettingsPage() {
   return (

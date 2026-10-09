@@ -3,7 +3,11 @@ import { Suspense } from "react";
 import { AuthForm } from "@/components/auth/auth-form";
 import styles from "@/components/auth/auth.module.css";
 
-export const metadata: Metadata = { title: "Sign in | Suji Blog" };
+export const metadata: Metadata = {
+  title: "Sign in | Suji Blog",
+  robots: { index: false, follow: true },
+  alternates: { canonical: null },
+};
 
 export default function SignInPage() {
   return (
