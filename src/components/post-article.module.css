@@ -1,39 +1,54 @@
 .page {
-  width: min(100% - 3rem, 70ch);
+  box-sizing: border-box;
+  width: min(100% - 3rem, 48rem);
   margin-inline: auto;
-  padding-block: 3rem 5rem;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1.25rem, 4vw, 3rem) 4rem;
+  background: var(--surface, #fff);
+  color: var(--foreground);
 }
 
 .back {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  margin-block-end: 1.5rem;
+  margin-block-end: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .heading {
-  padding-block-end: 2rem;
+  padding-block-end: 1.5rem;
   border-block-end: 1px solid var(--border);
 }
 
 .title {
   margin: 0 0 1.5rem;
-  font-family: var(--font-editorial, Georgia, serif);
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 400;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
   overflow-wrap: anywhere;
 }
 
-.dates { margin: 0; color: var(--muted); font-size: 0.9375rem; }
+.dates {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
 .body { margin-block: 2.5rem 3rem; }
 
 .headingActions {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  column-gap: 1.5rem;
+  gap: 0.5rem 1.5rem;
   margin-block-start: 1rem;
 }
 
@@ -43,8 +58,12 @@
   align-items: center;
   min-height: 44px;
   padding-block: 0.5rem;
-  font-size: 0.9375rem;
-  text-underline-offset: 0.2em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-underline-offset: 0.25em;
+  overflow-wrap: anywhere;
 }
 
 .articleControls {
@@ -57,11 +76,7 @@
   border-block-start: 0;
 }
 
-.exit {
-  padding-block: 1rem;
-  border-block-start: 1px solid var(--border);
-}
-
+.exit,
 .controls {
   padding-block: 1rem;
   border-block-start: 1px solid var(--border);
@@ -71,30 +86,52 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem 1.5rem;
 }
 
-.controlActions a, .controlActions button {
+.controlActions a,
+.controlActions button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 44px;
   min-height: 44px;
+  max-width: 100%;
   padding: 0.5rem 0;
   border: 0;
+  border-radius: 0;
   background: none;
   color: var(--foreground);
   font: inherit;
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: start;
+  text-transform: uppercase;
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.25em;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
 .controlActions :is(a, button):hover { text-decoration-thickness: 2px; }
-.controlActions button:disabled, .controlActions a[aria-disabled="true"] { color: var(--muted); cursor: wait; }
+.controlActions button:disabled,
+.controlActions a[aria-disabled="true"] { color: var(--muted); cursor: wait; }
+
+.page :is(a, button):focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 4px;
+}
+
 .confirmation { margin-block-start: 1rem; }
 .confirmation p { margin: 0 0 0.75rem; overflow-wrap: anywhere; }
-.error { margin-block: 1rem 0; font-weight: 600; }
+.error { margin-block: 1rem 0; font-weight: 600; overflow-wrap: anywhere; }
 
 @media (max-width: 40rem) {
-  .page { width: calc(100% - 2.5rem); padding-block-start: 2rem; }
+  .page {
+    width: calc(100% - 1.5rem);
+    padding-block: 1.5rem 3rem;
+  }
+
+  .back { margin-block-end: 1.5rem; }
 }

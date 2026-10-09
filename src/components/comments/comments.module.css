@@ -2,70 +2,141 @@
   margin-block-start: 3rem;
   padding-block-start: 2rem;
   border-block-start: 1px solid var(--border);
+  background: var(--surface, #fff);
+  color: var(--foreground);
 }
 
 .title {
   margin: 0 0 1.5rem;
-  font-family: var(--font-editorial, Georgia, serif);
-  font-size: 2rem;
-  font-weight: 400;
+  font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  font-size: clamp(1.75rem, 4vw, 2rem);
+  font-weight: 600;
   line-height: 1.2;
+  letter-spacing: -0.025em;
 }
 
-.section, .composer { scroll-margin-block-start: 1rem; }
+.section,
+.composer { scroll-margin-block-start: 2rem; }
 .composer { margin-block-end: 2rem; }
 .composer .form { margin-block-start: 0; }
 .list { margin: 0; padding: 0; list-style: none; }
-.comment { padding-block: 1.5rem; border-block-end: 1px solid var(--border); }
-.heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1rem; }
-.author { margin: 0; font: inherit; font-weight: 600; overflow-wrap: anywhere; }
-.body { margin-block: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment { padding-block: 1.75rem; border-block-end: 1px solid var(--border); }
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.author {
+  min-width: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.body {
+  margin-block: 1rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .empty { margin-block: 0 1.5rem; color: var(--muted); }
 .signIn { color: var(--muted); }
 .signIn p { margin: 0; }
 .authActions { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
-.authActions a { display: inline-flex; align-items: center; min-height: 44px; color: var(--foreground); }
-.hint { margin: 0; color: var(--muted); font-size: 0.875rem; }
 
-.form { display: grid; gap: 0.75rem; margin-block-start: 2rem; }
+.authActions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.form {
+  display: grid;
+  gap: 0.875rem;
+  min-width: 0;
+  margin-block-start: 2rem;
+  background: var(--surface, #fff);
+}
+
 .form label { font-weight: 600; }
 .form textarea {
+  box-sizing: border-box;
   width: 100%;
-  min-height: 8rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  background: var(--background);
+  min-width: 0;
+  min-height: 9rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--muted);
+  border-radius: 0;
+  background: var(--surface, #fff);
   color: var(--foreground);
   font: inherit;
   font-size: 1rem;
+  line-height: 1.65;
   resize: vertical;
 }
-.form textarea:disabled { color: var(--muted); }
-.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+
+.form textarea:disabled { color: var(--muted); cursor: wait; }
+.form textarea[aria-invalid="true"] { border: 2px solid var(--foreground); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; }
+
 .actions button {
+  min-width: 44px;
   min-height: 44px;
+  max-width: 100%;
   padding: 0.5rem 0;
   border: 0;
+  border-radius: 0;
   background: none;
   color: var(--foreground);
   font: inherit;
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.25em;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
+
 .actions button:hover:not(:disabled) { text-decoration-thickness: 2px; }
 .actions button:disabled { color: var(--muted); cursor: wait; }
 .actions .submit {
   min-height: 3rem;
-  padding: 0.75rem 1.25rem;
+  padding: 0.875rem 1.25rem;
   background: var(--foreground);
-  color: var(--background);
+  color: var(--surface, #fff);
   text-decoration: none;
 }
-.actions .submit:hover:not(:disabled) { background: #333333; }
-.actions .submit:disabled { color: var(--background); opacity: 0.65; }
+
+.actions .submit:hover:not(:disabled) { background: #333; }
+.actions .submit:disabled { background: #555; color: var(--surface, #fff); }
+
+.section :is(a, button, textarea):focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 4px;
+}
+
 .controls { margin-block-start: 0.75rem; }
-.confirmation { margin-block-start: 0.75rem; }
-.confirmation p { margin-block: 0 0.5rem; }
-.error { margin: 0; font-weight: 600; }
+.confirmation { margin-block-start: 1rem; }
+.confirmation p { margin-block: 0 0.5rem; overflow-wrap: anywhere; }
+.error { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
